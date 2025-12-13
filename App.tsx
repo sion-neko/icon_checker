@@ -1,23 +1,20 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Button, Image } from 'react-native';
+import { StyleSheet, View, Button, ScrollView } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
+import InstagramPreview from './components/InstagramPreview';
 
 export default function App() {
-  // 選択した画像のURIを保持する状態変数
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  // 画像選択関数
   const pickImage = async () => {
-    // ギャラリーから画像を選択
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [1, 1], // 正方形（アイコン用）
+      aspect: [1, 1],
       quality: 1,
     });
 
-    // キャンセルされなかった場合
     if (!result.canceled) {
       setSelectedImage(result.assets[0].uri);
     }
@@ -25,13 +22,15 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>アイコンチェッカー</Text>
+      <ScrollView style={styles.scrollView}>
+        <View style={styles.buttonContainer}>
+          <Button title="画像を選択" onPress={pickImage} />
+        </View>
 
-      <Button title="画像を選択" onPress={pickImage} />
-
-      {selectedImage && (
-        <Image source={{ uri: selectedImage }} style={styles.image} />
-      )}
+        {selectedImage && (
+          <InstagramPreview imageUri={selectedImage} />
+        )}
+      </ScrollView>
 
       <StatusBar style="auto" />
     </View>
@@ -42,19 +41,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  buttonContainer: {
     padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  image: {
-    width: 200,
-    height: 200,
-    marginTop: 20,
-    borderRadius: 100, // 円形
+    marginTop: 40,
   },
 });
