@@ -5,9 +5,11 @@ import { useState } from 'react';
 import InstagramPreview from './components/InstagramPreview';
 import XPreview from './components/XPreview';
 import LinePreview from './components/LinePreview';
+import Tab from './components/Tab';
 
 export default function App() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState(0);  // アクティブなタブ（0=Instagram, 1=X, 2=LINE）
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -22,21 +24,40 @@ export default function App() {
     }
   };
 
+  // アクティブなタブに応じてプレビューを切り替え
+  const renderPreview = () => {
+    if (!selectedImage) return null;
+
+    switch (activeTab) {
+      case 0:
+        return <InstagramPreview imageUri={selectedImage} />;
+      case 1:
+        return <XPreview imageUri={selectedImage} />;
+      case 2:
+        return <LinePreview imageUri={selectedImage} />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <View style={styles.container}>
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        <View style={styles.buttonContainer}>
-          <Button title="画像を選択" onPress={pickImage} />
-        </View>
+      <View style={styles.buttonContainer}>
+        <Button title="画像を選択" onPress={pickImage} />
+      </View>
 
-        {selectedImage && (
-          <>
-            <InstagramPreview imageUri={selectedImage} />
-            <XPreview imageUri={selectedImage} />
-            <LinePreview imageUri={selectedImage} />
-          </>
-        )}
-      </ScrollView>
+      {selectedImage && (
+        <>
+          <Tab
+            tabs={['Instagram', 'X', 'LINE']}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+          />
+          <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+            {renderPreview()}
+          </ScrollView>
+        </>
+      )}
 
       <StatusBar style="auto" />
     </View>
@@ -48,14 +69,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
+  buttonContainer: {
+    padding: 20,
+    paddingTop: 50,
+  },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
     padding: 20,
-    paddingTop: 40,
-  },
-  buttonContainer: {
-    marginBottom: 20,
   },
 });
