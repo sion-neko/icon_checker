@@ -3,6 +3,8 @@ import { StyleSheet, View, Button, ScrollView } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
 import InstagramPreview from './components/InstagramPreview';
+import XPreview from './components/XPreview';
+import LinePreview from './components/LinePreview';
 
 export default function App() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -22,13 +24,17 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <ScrollView style={styles.scrollView}>
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         <View style={styles.buttonContainer}>
           <Button title="画像を選択" onPress={pickImage} />
         </View>
 
         {selectedImage && (
-          <InstagramPreview imageUri={selectedImage} />
+          <>
+            <InstagramPreview imageUri={selectedImage} />
+            <XPreview imageUri={selectedImage} />
+            <LinePreview imageUri={selectedImage} />
+          </>
         )}
       </ScrollView>
 
@@ -45,8 +51,11 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  buttonContainer: {
+  scrollContent: {
     padding: 20,
-    marginTop: 40,
+    paddingTop: 40,
+  },
+  buttonContainer: {
+    marginBottom: 20,
   },
 });
