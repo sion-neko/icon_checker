@@ -20,8 +20,8 @@ export default function App() {
 
   // FlatListの参照を保持（プログラムからスクロール位置を制御するため）
   const flatListRef = useRef<FlatList>(null);
-
-  const addImage = async () => {
+  // 1枚選択（トリミングあり）
+  const addSingleImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -34,6 +34,24 @@ export default function App() {
       setSelectedImageIndex(images.length);
     }
   };
+
+  // 複数枚選択（トリミングなし）
+  const addMultipleImages = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: false,
+      allowsMultipleSelection: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const newImageUris = result.assets.map(asset => asset.uri);
+      setImages([...images, ...newImageUris]);
+      setSelectedImageIndex(images.length);
+    }
+  };
+
+
 
   const removeImage = (index: number) => {
     const newImages = images.filter((_, i) => i !== index);
@@ -73,7 +91,9 @@ export default function App() {
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
-        <Button title="📷 画像を追加" onPress={addImage} />
+        <Button title="📷 1枚追加" onPress={addSingleImage} />
+        <Button title="📷 複数追加" onPress={addMultipleImages} />
+
 
         {images.length > 0 && (
           <View style={styles.imageListContainer}>
