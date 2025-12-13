@@ -7,7 +7,6 @@ import XPreview from './components/XPreview';
 import LinePreview from './components/LinePreview';
 import Tab from './components/Tab';
 
-// 画面幅を取得
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function App() {
@@ -18,9 +17,11 @@ export default function App() {
   const [displayName, setDisplayName] = useState('あなたの名前');
   const [username, setUsername] = useState('your_username');
 
-  // FlatListの参照を保持（プログラムからスクロール位置を制御するため）
+  // ヘッダーの開閉状態
+  const [isHeaderExpanded, setIsHeaderExpanded] = useState(true);
+
   const flatListRef = useRef<FlatList>(null);
-  // 1枚選択（トリミングあり）
+
   const addSingleImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -35,7 +36,6 @@ export default function App() {
     }
   };
 
-  // 複数枚選択（トリミングなし）
   const addMultipleImages = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -51,8 +51,6 @@ export default function App() {
     }
   };
 
-
-
   const removeImage = (index: number) => {
     const newImages = images.filter((_, i) => i !== index);
     setImages(newImages);
@@ -62,13 +60,11 @@ export default function App() {
     }
   };
 
-  // サムネイルをタップした時、FlatListもその位置にスクロール
   const selectImage = (index: number) => {
     setSelectedImageIndex(index);
     flatListRef.current?.scrollToIndex({ index, animated: true });
   };
 
-  // プレビューを生成する関数
   const renderPreviewItem = (imageUri: string) => {
     const props = {
       imageUri,
@@ -90,77 +86,108 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.headerContainer}>
-        <Button title="📷 1枚追加" onPress={addSingleImage} />
-        <Button title="📷 複数追加" onPress={addMultipleImages} />
+      {/* コンパクトヘッダー */}
+      <View style={styles.compactHeader}>
+        <TouchableOpacity
+          style={styles.toggleButton}
+          onPress={() => setIsHeaderExpanded(!isHeaderExpanded)}
+        >
+          <Text style={styles.toggleIcon}>
+            {isHeaderExpanded ? '▼' : '▶'}
+          </Text>
+          <Text style={styles.toggleText}>
+            {isHeaderExpanded ? '設定を閉じる' : '設定を開く'}
+          </Text>
+        </TouchableOpacity>
 
-
+        {/* 画像数表示 */}
         {images.length > 0 && (
-          <View style={styles.imageListContainer}>
-            <Text style={styles.sectionLabel}>
-              選択した画像（{selectedImageIndex + 1}/{images.length}）
-            </Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.imageList}
-            >
-              {images.map((img, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={[
-                    styles.imageItem,
-                    selectedImageIndex === index && styles.imageItemSelected
-                  ]}
-                  onPress={() => selectImage(index)}
-                >
-                  <Image source={{ uri: img }} style={styles.thumbnail} />
-                  {selectedImageIndex === index && (
-                    <View style={styles.selectedBadge}>
-                      <Text style={styles.selectedBadgeText}>✓</Text>
-                    </View>
-                  )}
-                  <TouchableOpacity
-                    style={styles.deleteButton}
-                    onPress={() => removeImage(index)}
-                  >
-                    <Text style={styles.deleteButtonText}>×</Text>
-                  </TouchableOpacity>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
+          <Text style={styles.imageCount}>
+            {selectedImageIndex + 1}/{images.length}
+          </Text>
         )}
+      </View>
 
-        <View style={styles.inputContainer}>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>表示名</Text>
-            <TextInput
-              style={styles.input}
-              value={displayName}
-              onChangeText={setDisplayName}
-              placeholder="表示名を入力"
-              placeholderTextColor="#999"
-            />
+      {/* 展開可能なヘッダー */}
+      {isHeaderExpanded && (
+        <View style={styles.expandedHeader}>
+          {/* ボタン */}
+          <View style={styles.buttonRow}>
+            <View style={styles.buttonWrapper}>
+              <Button title="📷 1枚追加" onPress={addSingleImage} />
+            </View>
+            <View style={styles.buttonWrapper}>
+              <Button title="📷 複数追加" onPress={addMultipleImages} />
+            </View>
           </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>ユーザーID</Text>
-            <View style={styles.usernameInput}>
-              <Text style={styles.atSymbol}>@</Text>
+          {/* 画像リスト */}
+          {images.length > 0 && (
+            <View style={styles.imageListContainer}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.imageList}
+              >
+                {images.map((img, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={[
+                      styles.imageItem,
+                      selectedImageIndex === index && styles.imageItemSelected
+                    ]}
+                    onPress={() => selectImage(index)}
+                  >
+                    <Image source={{ uri: img }} style={styles.thumbnail} />
+                    {selectedImageIndex === index && (
+                      <View style={styles.selectedBadge}>
+                        <Text style={styles.selectedBadgeText}>✓</Text>
+                      </View>
+                    )}
+                    <TouchableOpacity
+                      style={styles.deleteButton}
+                      onPress={() => removeImage(index)}
+                    >
+                      <Text style={styles.deleteButtonText}>×</Text>
+                    </TouchableOpacity>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          )}
+
+          {/* ユーザー情報入力 */}
+          <View style={styles.inputContainer}>
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>表示名</Text>
               <TextInput
-                style={[styles.input, styles.usernameField]}
-                value={username}
-                onChangeText={setUsername}
-                placeholder="username"
+                style={styles.input}
+                value={displayName}
+                onChangeText={setDisplayName}
+                placeholder="表示名を入力"
                 placeholderTextColor="#999"
-                autoCapitalize="none"
               />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>ユーザーID</Text>
+              <View style={styles.usernameInput}>
+                <Text style={styles.atSymbol}>@</Text>
+                <TextInput
+                  style={[styles.input, styles.usernameField]}
+                  value={username}
+                  onChangeText={setUsername}
+                  placeholder="username"
+                  placeholderTextColor="#999"
+                  autoCapitalize="none"
+                />
+              </View>
             </View>
           </View>
         </View>
-      </View>
+      )}
 
+      {/* タブとプレビュー */}
       {images.length > 0 && (
         <>
           <Tab
@@ -169,16 +196,14 @@ export default function App() {
             onTabChange={setActiveTab}
           />
 
-          {/* スワイプ可能なプレビュー */}
           <FlatList
             ref={flatListRef}
             data={images}
             horizontal
-            pagingEnabled  // ページング（1画面ずつスクロール）
+            pagingEnabled
             showsHorizontalScrollIndicator={false}
             keyExtractor={(item, index) => index.toString()}
             onMomentumScrollEnd={(event) => {
-              // スクロール終了時に現在のページを計算
               const index = Math.round(
                 event.nativeEvent.contentOffset.x / SCREEN_WIDTH
               );
@@ -210,22 +235,59 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  headerContainer: {
-    padding: 20,
+
+  // コンパクトヘッダー
+  compactHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
     paddingTop: 50,
+    paddingBottom: 12,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#e5e5e5',
   },
-
-  imageListContainer: {
-    marginTop: 16,
+  toggleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 8,
   },
-  sectionLabel: {
+  toggleIcon: {
     fontSize: 14,
+    marginRight: 8,
+    color: '#007AFF',
+  },
+  toggleText: {
+    fontSize: 16,
+    color: '#007AFF',
+    fontWeight: '600',
+  },
+  imageCount: {
+    fontSize: 16,
     fontWeight: '600',
     color: '#333',
-    marginBottom: 8,
+  },
+
+  // 展開ヘッダー
+  expandedHeader: {
+    padding: 16,
+    backgroundColor: '#f9f9f9',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e5e5',
+  },
+
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 16,
+  },
+  buttonWrapper: {
+    flex: 1,
+  },
+
+  imageListContainer: {
+    marginBottom: 16,
   },
   imageList: {
     marginBottom: 8,
@@ -241,8 +303,8 @@ const styles = StyleSheet.create({
     borderColor: '#007AFF',
   },
   thumbnail: {
-    width: 80,
-    height: 80,
+    width: 70,
+    height: 70,
     borderRadius: 8,
   },
   selectedBadge: {
@@ -251,14 +313,14 @@ const styles = StyleSheet.create({
     left: 4,
     backgroundColor: '#007AFF',
     borderRadius: 12,
-    width: 24,
-    height: 24,
+    width: 20,
+    height: 20,
     justifyContent: 'center',
     alignItems: 'center',
   },
   selectedBadgeText: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: 'bold',
   },
   deleteButton: {
@@ -267,26 +329,26 @@ const styles = StyleSheet.create({
     right: 4,
     backgroundColor: 'rgba(0,0,0,0.6)',
     borderRadius: 12,
-    width: 24,
-    height: 24,
+    width: 20,
+    height: 20,
     justifyContent: 'center',
     alignItems: 'center',
   },
   deleteButtonText: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
-    lineHeight: 20,
+    lineHeight: 18,
   },
 
   inputContainer: {
-    marginTop: 16,
+    gap: 12,
   },
   inputGroup: {
-    marginBottom: 12,
+    marginBottom: 0,
   },
   label: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
     color: '#333',
     marginBottom: 6,
@@ -295,8 +357,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
+    padding: 10,
+    fontSize: 15,
     backgroundColor: '#fff',
   },
   usernameInput: {
@@ -309,7 +371,7 @@ const styles = StyleSheet.create({
   },
   atSymbol: {
     paddingLeft: 12,
-    fontSize: 16,
+    fontSize: 15,
     color: '#666',
   },
   usernameField: {
