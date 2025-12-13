@@ -1,23 +1,26 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View, Button, ScrollView, TextInput, Text, Image, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Button, ScrollView, TextInput, Text, Image, TouchableOpacity, FlatList, Dimensions } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import InstagramPreview from './components/InstagramPreview';
 import XPreview from './components/XPreview';
 import LinePreview from './components/LinePreview';
 import Tab from './components/Tab';
 
+// 画面幅を取得
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
 export default function App() {
-  // 複数の画像を配列で管理
   const [images, setImages] = useState<string[]>([]);
-  // 現在選択中の画像のインデックス
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
   const [activeTab, setActiveTab] = useState(0);
 
   const [displayName, setDisplayName] = useState('あなたの名前');
   const [username, setUsername] = useState('your_username');
 
-  // 画像を追加する関数
+  // FlatListの参照を保持（プログラムからスクロール位置を制御するため）
+  const flatListRef = useRef<FlatList>(null);
+
   const addImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -27,30 +30,30 @@ export default function App() {
     });
 
     if (!result.canceled) {
-      // 既存の配列に新しい画像を追加
       setImages([...images, result.assets[0].uri]);
-      // 追加した画像を自動選択
       setSelectedImageIndex(images.length);
     }
   };
 
-  // 画像を削除する関数
   const removeImage = (index: number) => {
     const newImages = images.filter((_, i) => i !== index);
     setImages(newImages);
 
-    // 削除後の選択状態を調整
     if (selectedImageIndex >= newImages.length) {
       setSelectedImageIndex(Math.max(0, newImages.length - 1));
     }
   };
 
-  const renderPreview = () => {
-    // 画像が選択されていない場合
-    if (images.length === 0) return null;
+  // サムネイルをタップした時、FlatListもその位置にスクロール
+  const selectImage = (index: number) => {
+    setSelectedImageIndex(index);
+    flatListRef.current?.scrollToIndex({ index, animated: true });
+  };
 
+  // プレビューを生成する関数
+  const renderPreviewItem = (imageUri: string) => {
     const props = {
-      imageUri: images[selectedImageIndex],
+      imageUri,
       displayName,
       username,
     };
@@ -72,10 +75,11 @@ export default function App() {
       <View style={styles.headerContainer}>
         <Button title="📷 画像を追加" onPress={addImage} />
 
-        {/* 画像リスト表示 */}
         {images.length > 0 && (
           <View style={styles.imageListContainer}>
-            <Text style={styles.sectionLabel}>選択した画像（{images.length}枚）</Text>
+            <Text style={styles.sectionLabel}>
+              選択した画像（{selectedImageIndex + 1}/{images.length}）
+            </Text>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -88,16 +92,14 @@ export default function App() {
                     styles.imageItem,
                     selectedImageIndex === index && styles.imageItemSelected
                   ]}
-                  onPress={() => setSelectedImageIndex(index)}
+                  onPress={() => selectImage(index)}
                 >
                   <Image source={{ uri: img }} style={styles.thumbnail} />
-                  {/* 選択中の印 */}
                   {selectedImageIndex === index && (
                     <View style={styles.selectedBadge}>
                       <Text style={styles.selectedBadgeText}>✓</Text>
                     </View>
                   )}
-                  {/* 削除ボタン */}
                   <TouchableOpacity
                     style={styles.deleteButton}
                     onPress={() => removeImage(index)}
@@ -110,7 +112,6 @@ export default function App() {
           </View>
         )}
 
-        {/* ユーザー情報入力欄 */}
         <View style={styles.inputContainer}>
           <View style={styles.inputGroup}>
             <Text style={styles.label}>表示名</Text>
@@ -147,9 +148,35 @@ export default function App() {
             activeTab={activeTab}
             onTabChange={setActiveTab}
           />
-          <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-            {renderPreview()}
-          </ScrollView>
+
+          {/* スワイプ可能なプレビュー */}
+          <FlatList
+            ref={flatListRef}
+            data={images}
+            horizontal
+            pagingEnabled  // ページング（1画面ずつスクロール）
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(item, index) => index.toString()}
+            onMomentumScrollEnd={(event) => {
+              // スクロール終了時に現在のページを計算
+              const index = Math.round(
+                event.nativeEvent.contentOffset.x / SCREEN_WIDTH
+              );
+              setSelectedImageIndex(index);
+            }}
+            renderItem={({ item }) => (
+              <View style={styles.previewContainer}>
+                <ScrollView contentContainerStyle={styles.scrollContent}>
+                  {renderPreviewItem(item)}
+                </ScrollView>
+              </View>
+            )}
+            getItemLayout={(data, index) => ({
+              length: SCREEN_WIDTH,
+              offset: SCREEN_WIDTH * index,
+              index,
+            })}
+          />
         </>
       )}
 
@@ -171,7 +198,6 @@ const styles = StyleSheet.create({
     borderBottomColor: '#e5e5e5',
   },
 
-  // 画像リスト
   imageListContainer: {
     marginTop: 16,
   },
@@ -270,8 +296,10 @@ const styles = StyleSheet.create({
     flex: 1,
     borderWidth: 0,
   },
-  scrollView: {
-    flex: 1,
+
+  // プレビュー部分
+  previewContainer: {
+    width: SCREEN_WIDTH,
   },
   scrollContent: {
     padding: 20,
