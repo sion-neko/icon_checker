@@ -10,6 +10,17 @@ interface Props {
 export default function InstagramPreview({ imageUri, displayName, username }: Props) {
     return (
         <View style={styles.container}>
+            {/* ストーリーズプレビュー */}
+            <View style={styles.stories}>
+                <Text style={styles.sectionTitle}>ストーリーズ</Text>
+                <View style={styles.storyItem}>
+                    <View style={styles.storyRing}>
+                        <Image source={{ uri: imageUri }} style={styles.storyAvatar} />
+                    </View>
+                    <Text style={styles.storyName}>{displayName}</Text>
+                </View>
+            </View>
+
             {/* フィード投稿 */}
             <View style={styles.post}>
                 {/* ヘッダー */}
@@ -56,16 +67,7 @@ export default function InstagramPreview({ imageUri, displayName, username }: Pr
                 <Text style={styles.timestamp}>2 HOURS AGO</Text>
             </View>
 
-            {/* ストーリーズプレビュー */}
-            <View style={styles.stories}>
-                <Text style={styles.sectionTitle}>ストーリーズ</Text>
-                <View style={styles.storyItem}>
-                    <View style={styles.storyRing}>
-                        <Image source={{ uri: imageUri }} style={styles.storyAvatar} />
-                    </View>
-                    <Text style={styles.storyName}>{displayName}</Text>
-                </View>
-            </View>
+
         </View>
     );
 }

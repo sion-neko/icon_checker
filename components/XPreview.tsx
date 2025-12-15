@@ -10,6 +10,37 @@ interface Props {
 export default function XPreview({ imageUri, displayName, username }: Props) {
     return (
         <View style={styles.container}>
+            {/* プロフィール画面風 */}
+            <View style={styles.profile}>
+                <Text style={styles.sectionTitle}>プロフィール画面</Text>
+
+                {/* ヘッダー画像 */}
+                <View style={styles.profileHeader}>
+                    <View style={styles.coverPhoto} />
+                    <View style={styles.avatarContainer}>
+                        <Image source={{ uri: imageUri }} style={styles.profileAvatar} />
+                    </View>
+                </View>
+
+                {/* プロフィール情報 */}
+                <View style={styles.profileInfo}>
+                    <Text style={styles.profileName}>{displayName}</Text>
+                    <Text style={styles.profileUsername}>@{username}</Text>
+                    <Text style={styles.bio}>
+                        プロフィール文がここに入ります。{'\n'}
+                        趣味や仕事について書きます。
+                    </Text>
+                    <View style={styles.profileStats}>
+                        <Text style={styles.stat}>
+                            <Text style={styles.statNumber}>123</Text> Following
+                        </Text>
+                        <Text style={styles.stat}>
+                            <Text style={styles.statNumber}>456</Text> Followers
+                        </Text>
+                    </View>
+                </View>
+            </View>
+
             {/* タイムライン投稿 */}
             <View style={styles.tweet}>
                 <Image source={{ uri: imageUri }} style={styles.avatar} />
@@ -56,36 +87,7 @@ export default function XPreview({ imageUri, displayName, username }: Props) {
                 </View>
             </View>
 
-            {/* プロフィール画面風 */}
-            <View style={styles.profile}>
-                <Text style={styles.sectionTitle}>プロフィール画面</Text>
 
-                {/* ヘッダー画像 */}
-                <View style={styles.profileHeader}>
-                    <View style={styles.coverPhoto} />
-                    <View style={styles.avatarContainer}>
-                        <Image source={{ uri: imageUri }} style={styles.profileAvatar} />
-                    </View>
-                </View>
-
-                {/* プロフィール情報 */}
-                <View style={styles.profileInfo}>
-                    <Text style={styles.profileName}>{displayName}</Text>
-                    <Text style={styles.profileUsername}>@{username}</Text>
-                    <Text style={styles.bio}>
-                        プロフィール文がここに入ります。{'\n'}
-                        趣味や仕事について書きます。
-                    </Text>
-                    <View style={styles.profileStats}>
-                        <Text style={styles.stat}>
-                            <Text style={styles.statNumber}>123</Text> Following
-                        </Text>
-                        <Text style={styles.stat}>
-                            <Text style={styles.statNumber}>456</Text> Followers
-                        </Text>
-                    </View>
-                </View>
-            </View>
         </View>
     );
 }

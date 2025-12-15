@@ -10,6 +10,18 @@ interface Props {
 export default function LinePreview({ imageUri, displayName, username }: Props) {
     return (
         <View style={styles.container}>
+            {/* プロフィール画面 */}
+            <View style={styles.section}>
+                <Text style={styles.sectionTitle}>プロフィール</Text>
+                <View style={styles.profileCard}>
+                    <View style={styles.profileHeader}>
+                        <Image source={{ uri: imageUri }} style={styles.profileAvatar} />
+                        <Text style={styles.profileName}>{displayName}</Text>
+                        <Text style={styles.statusMessage}>ステータスメッセージ</Text>
+                    </View>
+                </View>
+            </View>
+
             {/* トークリスト */}
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>トークリスト</Text>
@@ -92,17 +104,7 @@ export default function LinePreview({ imageUri, displayName, username }: Props) 
                 </View>
             </View>
 
-            {/* プロフィール画面 */}
-            <View style={styles.section}>
-                <Text style={styles.sectionTitle}>プロフィール</Text>
-                <View style={styles.profileCard}>
-                    <View style={styles.profileHeader}>
-                        <Image source={{ uri: imageUri }} style={styles.profileAvatar} />
-                        <Text style={styles.profileName}>{displayName}</Text>
-                        <Text style={styles.statusMessage}>ステータスメッセージ</Text>
-                    </View>
-                </View>
-            </View>
+
         </View>
     );
 }
