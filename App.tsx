@@ -1,7 +1,8 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View, Button, ScrollView, TextInput, Text, Image, TouchableOpacity, FlatList, Dimensions } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import InstagramPreview from './components/InstagramPreview';
 import XPreview from './components/XPreview';
 import LinePreview from './components/LinePreview';
@@ -21,6 +22,27 @@ export default function App() {
   const [isHeaderExpanded, setIsHeaderExpanded] = useState(true);
 
   const flatListRef = useRef<FlatList>(null);
+
+  // AsyncStorageから保存データを読み込み
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        const savedDisplayName = await AsyncStorage.getItem('displayName');
+        const savedUsername = await AsyncStorage.getItem('username');
+
+        if (savedDisplayName !== null) {
+          setDisplayName(savedDisplayName);
+        }
+        if (savedUsername !== null) {
+          setUsername(savedUsername);
+        }
+      } catch (error) {
+        console.error('Failed to load user data:', error);
+      }
+    };
+
+    loadUserData();
+  }, []);
 
   const addSingleImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -64,6 +86,32 @@ export default function App() {
     setSelectedImageIndex(index);
     flatListRef.current?.scrollToIndex({ index, animated: true });
   };
+
+  // displayNameが変更されたら自動保存
+  useEffect(() => {
+    const saveDisplayName = async () => {
+      try {
+        await AsyncStorage.setItem('displayName', displayName);
+      } catch (error) {
+        console.error('Failed to save display name:', error);
+      }
+    };
+
+    saveDisplayName();
+  }, [displayName]);
+
+  // usernameが変更されたら自動保存
+  useEffect(() => {
+    const saveUsername = async () => {
+      try {
+        await AsyncStorage.setItem('username', username);
+      } catch (error) {
+        console.error('Failed to save username:', error);
+      }
+    };
+
+    saveUsername();
+  }, [username]);
 
   const renderPreviewItem = (imageUri: string) => {
     const props = {
