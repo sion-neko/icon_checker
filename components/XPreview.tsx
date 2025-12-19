@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Image, Text, StyleSheet } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 
 interface Props {
     imageUri: string;
@@ -53,7 +54,7 @@ export default function XPreview({ imageUri, displayName, username }: Props) {
                         <Text style={styles.dot}>·</Text>
                         <Text style={styles.time}>2h</Text>
                         <View style={styles.spacer} />
-                        <Text style={styles.moreIcon}>⋯</Text>
+                        <Feather name="more-horizontal" size={18} color="#536471" />
                     </View>
 
                     {/* ツイート本文 */}
@@ -65,23 +66,23 @@ export default function XPreview({ imageUri, displayName, username }: Props) {
                     {/* アクションボタン */}
                     <View style={styles.actions}>
                         <View style={styles.action}>
-                            <Text style={styles.actionIcon}>💬</Text>
+                            <Feather name="message-circle" size={18} color="#536471" />
                             <Text style={styles.actionCount}>12</Text>
                         </View>
                         <View style={styles.action}>
-                            <Text style={styles.actionIcon}>🔁</Text>
+                            <Feather name="repeat" size={18} color="#536471" />
                             <Text style={styles.actionCount}>34</Text>
                         </View>
                         <View style={styles.action}>
-                            <Text style={styles.actionIcon}>❤️</Text>
+                            <Feather name="heart" size={18} color="#536471" />
                             <Text style={styles.actionCount}>128</Text>
                         </View>
                         <View style={styles.action}>
-                            <Text style={styles.actionIcon}>📊</Text>
+                            <Feather name="bar-chart-2" size={18} color="#536471" />
                             <Text style={styles.actionCount}>1.2K</Text>
                         </View>
                         <View style={styles.action}>
-                            <Text style={styles.actionIcon}>🔖</Text>
+                            <Feather name="bookmark" size={18} color="#536471" />
                         </View>
                     </View>
                 </View>
@@ -126,10 +127,12 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 15,
         marginRight: 4,
+        fontFamily: 'Inter_700Bold',
     },
     username: {
         color: '#536471',
         fontSize: 15,
+        fontFamily: 'Inter_400Regular',
     },
     dot: {
         color: '#536471',
@@ -150,6 +153,7 @@ const styles = StyleSheet.create({
         fontSize: 15,
         lineHeight: 20,
         marginBottom: 12,
+        fontFamily: 'Inter_400Regular',
     },
     actions: {
         flexDirection: 'row',
@@ -214,11 +218,13 @@ const styles = StyleSheet.create({
     profileName: {
         fontSize: 20,
         fontWeight: 'bold',
+        fontFamily: 'Inter_700Bold',
     },
     profileUsername: {
         fontSize: 15,
         color: '#536471',
         marginBottom: 12,
+        fontFamily: 'Inter_400Regular',
     },
     bio: {
         fontSize: 15,
@@ -236,5 +242,6 @@ const styles = StyleSheet.create({
     statNumber: {
         fontWeight: 'bold',
         color: '#0f1419',
+        fontFamily: 'Inter_700Bold',
     },
 });

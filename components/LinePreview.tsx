@@ -170,6 +170,7 @@ const styles = StyleSheet.create({
     chatName: {
         fontWeight: 'bold',
         fontSize: 16,
+        fontFamily: 'Inter_600SemiBold',
     },
     time: {
         color: '#999',
@@ -237,6 +238,7 @@ const styles = StyleSheet.create({
     messageText: {
         fontSize: 15,
         color: '#000',
+        fontFamily: 'Inter_400Regular',
     },
     messageTime: {
         fontSize: 11,
@@ -262,6 +264,7 @@ const styles = StyleSheet.create({
     messageTextMe: {
         fontSize: 15,
         color: '#fff',
+        fontFamily: 'Inter_400Regular',
     },
     messageTimeMe: {
         fontSize: 11,
@@ -290,6 +293,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
         marginBottom: 4,
+        fontFamily: 'Inter_700Bold',
     },
     statusMessage: {
         fontSize: 14,

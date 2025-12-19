@@ -1,6 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View, Button, ScrollView, TextInput, Text, Image, TouchableOpacity, FlatList, Dimensions } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { Feather } from '@expo/vector-icons';
 import { useState, useRef, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import InstagramPreview from './components/InstagramPreview';
@@ -8,9 +9,18 @@ import XPreview from './components/XPreview';
 import LinePreview from './components/LinePreview';
 import Tab from './components/Tab';
 
+import { useFonts, Inter_400Regular, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
+import { ActivityIndicator } from 'react-native';
+
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function App() {
+  let [fontsLoaded] = useFonts({
+    Inter_400Regular,
+    Inter_600SemiBold,
+    Inter_700Bold,
+  });
+
   const [images, setImages] = useState<string[]>([]);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
   const [activeTab, setActiveTab] = useState(0);
@@ -45,30 +55,42 @@ export default function App() {
   }, []);
 
   const addSingleImage = async () => {
+    try {
+      // カメラの権限をリクエスト（必要な場合）
+      const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+
+      if (permissionResult.granted === false) {
+        alert("カメラへのアクセス許可が必要です。");
+        return;
+      }
+
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1,
+      });
+
+      if (!result.canceled) {
+        setImages([...images, result.assets[0].uri]);
+        setSelectedImageIndex(images.length);
+      }
+    } catch (error) {
+      console.log('Error launching camera:', error);
+    }
+  };
+
+  const addLibraryImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
+      allowsMultipleSelection: false,
       aspect: [1, 1],
       quality: 1,
     });
 
     if (!result.canceled) {
       setImages([...images, result.assets[0].uri]);
-      setSelectedImageIndex(images.length);
-    }
-  };
-
-  const addMultipleImages = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: false,
-      allowsMultipleSelection: true,
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      const newImageUris = result.assets.map(asset => asset.uri);
-      setImages([...images, ...newImageUris]);
       setSelectedImageIndex(images.length);
     }
   };
@@ -132,6 +154,14 @@ export default function App() {
     }
   };
 
+  if (!fontsLoaded) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       {/* コンパクトヘッダー */}
@@ -140,9 +170,12 @@ export default function App() {
           style={styles.toggleButton}
           onPress={() => setIsHeaderExpanded(!isHeaderExpanded)}
         >
-          <Text style={styles.toggleIcon}>
-            {isHeaderExpanded ? '▼' : '▶'}
-          </Text>
+          <Feather
+            name={isHeaderExpanded ? 'chevron-down' : 'chevron-right'}
+            size={20}
+            color="#007AFF"
+            style={{ marginRight: 8 }}
+          />
           <Text style={styles.toggleText}>
             {isHeaderExpanded ? '設定を閉じる' : '設定を開く'}
           </Text>
@@ -162,10 +195,16 @@ export default function App() {
           {/* ボタン */}
           <View style={styles.buttonRow}>
             <View style={styles.buttonWrapper}>
-              <Button title="📷 1枚追加" onPress={addSingleImage} />
+              <TouchableOpacity style={styles.actionButton} onPress={addSingleImage}>
+                <Feather name="camera" size={20} color="#fff" style={styles.buttonIcon} />
+                <Text style={styles.actionButtonText}>カメラ</Text>
+              </TouchableOpacity>
             </View>
             <View style={styles.buttonWrapper}>
-              <Button title="📷 複数追加" onPress={addMultipleImages} />
+              <TouchableOpacity style={styles.actionButton} onPress={addLibraryImage}>
+                <Feather name="image" size={20} color="#fff" style={styles.buttonIcon} />
+                <Text style={styles.actionButtonText}>ライブラリ</Text>
+              </TouchableOpacity>
             </View>
           </View>
 
@@ -189,14 +228,14 @@ export default function App() {
                     <Image source={{ uri: img }} style={styles.thumbnail} />
                     {selectedImageIndex === index && (
                       <View style={styles.selectedBadge}>
-                        <Text style={styles.selectedBadgeText}>✓</Text>
+                        <Feather name="check" size={12} color="#fff" />
                       </View>
                     )}
                     <TouchableOpacity
                       style={styles.deleteButton}
                       onPress={() => removeImage(index)}
                     >
-                      <Text style={styles.deleteButtonText}>×</Text>
+                      <Feather name="x" size={14} color="#fff" />
                     </TouchableOpacity>
                   </TouchableOpacity>
                 ))}
@@ -233,48 +272,51 @@ export default function App() {
             </View>
           </View>
         </View>
-      )}
+      )
+      }
 
       {/* タブとプレビュー */}
-      {images.length > 0 && (
-        <>
-          <Tab
-            tabs={['Instagram', 'X', 'LINE']}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-          />
+      {
+        images.length > 0 && (
+          <>
+            <Tab
+              tabs={['Instagram', 'X', 'LINE']}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+            />
 
-          <FlatList
-            ref={flatListRef}
-            data={images}
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            keyExtractor={(item, index) => index.toString()}
-            onMomentumScrollEnd={(event) => {
-              const index = Math.round(
-                event.nativeEvent.contentOffset.x / SCREEN_WIDTH
-              );
-              setSelectedImageIndex(index);
-            }}
-            renderItem={({ item }) => (
-              <View style={styles.previewContainer}>
-                <ScrollView contentContainerStyle={styles.scrollContent}>
-                  {renderPreviewItem(item)}
-                </ScrollView>
-              </View>
-            )}
-            getItemLayout={(data, index) => ({
-              length: SCREEN_WIDTH,
-              offset: SCREEN_WIDTH * index,
-              index,
-            })}
-          />
-        </>
-      )}
+            <FlatList
+              ref={flatListRef}
+              data={images}
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              keyExtractor={(item, index) => index.toString()}
+              onMomentumScrollEnd={(event) => {
+                const index = Math.round(
+                  event.nativeEvent.contentOffset.x / SCREEN_WIDTH
+                );
+                setSelectedImageIndex(index);
+              }}
+              renderItem={({ item }) => (
+                <View style={styles.previewContainer}>
+                  <ScrollView contentContainerStyle={styles.scrollContent}>
+                    {renderPreviewItem(item)}
+                  </ScrollView>
+                </View>
+              )}
+              getItemLayout={(data, index) => ({
+                length: SCREEN_WIDTH,
+                offset: SCREEN_WIDTH * index,
+                index,
+              })}
+            />
+          </>
+        )
+      }
 
       <StatusBar style="auto" />
-    </View>
+    </View >
   );
 }
 
@@ -294,7 +336,13 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e5e5',
+    borderBottomColor: '#f0f0f0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 4,
+    zIndex: 100,
   },
   toggleButton: {
     flexDirection: 'row',
@@ -310,28 +358,52 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#007AFF',
     fontWeight: '600',
+    fontFamily: 'Inter_600SemiBold',
   },
   imageCount: {
     fontSize: 16,
     fontWeight: '600',
     color: '#333',
+    fontFamily: 'Inter_600SemiBold',
   },
 
   // 展開ヘッダー
   expandedHeader: {
     padding: 16,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#fafafa',
     borderBottomWidth: 1,
     borderBottomColor: '#e5e5e5',
   },
 
   buttonRow: {
     flexDirection: 'row',
-    gap: 10,
-    marginBottom: 16,
+    gap: 12,
+    marginBottom: 20,
   },
   buttonWrapper: {
     flex: 1,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#007AFF', // iOS Blue
+    paddingVertical: 12,
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  buttonIcon: {
+    marginRight: 8,
+  },
+  actionButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    fontFamily: 'Inter_600SemiBold',
   },
 
   imageListContainer: {
@@ -345,26 +417,40 @@ const styles = StyleSheet.create({
     position: 'relative',
     borderWidth: 3,
     borderColor: 'transparent',
-    borderRadius: 12,
+    borderRadius: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   imageItemSelected: {
     borderColor: '#007AFF',
+    shadowColor: '#007AFF',
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
   thumbnail: {
     width: 70,
     height: 70,
-    borderRadius: 8,
+    borderRadius: 10,
+    backgroundColor: '#f0f0f0',
   },
   selectedBadge: {
     position: 'absolute',
-    top: 4,
-    left: 4,
+    top: -6,
+    right: -6, // Checkmark on top-right is more common for selection
+    left: 'auto',
     backgroundColor: '#007AFF',
     borderRadius: 12,
-    width: 20,
-    height: 20,
+    width: 22,
+    height: 22,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#fff',
+    zIndex: 10,
   },
   selectedBadgeText: {
     color: '#fff',
@@ -373,20 +459,22 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     position: 'absolute',
-    top: 4,
-    right: 4,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    top: -6,
+    left: -6,
+    backgroundColor: '#FF3B30', // Red for delete
     borderRadius: 12,
-    width: 20,
-    height: 20,
+    width: 22,
+    height: 22,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#fff',
+    zIndex: 10,
   },
   deleteButtonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
-    lineHeight: 18,
   },
 
   inputContainer: {
@@ -400,6 +488,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#333',
     marginBottom: 6,
+    fontFamily: 'Inter_600SemiBold',
   },
   input: {
     borderWidth: 1,
@@ -408,6 +497,7 @@ const styles = StyleSheet.create({
     padding: 10,
     fontSize: 15,
     backgroundColor: '#fff',
+    fontFamily: 'Inter_400Regular',
   },
   usernameInput: {
     flexDirection: 'row',
@@ -421,6 +511,7 @@ const styles = StyleSheet.create({
     paddingLeft: 12,
     fontSize: 15,
     color: '#666',
+    fontFamily: 'Inter_400Regular',
   },
   usernameField: {
     flex: 1,

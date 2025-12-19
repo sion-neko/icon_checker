@@ -51,9 +51,11 @@ const styles = StyleSheet.create({
     tabText: {
         fontSize: 16,
         color: '#666',
+        fontFamily: 'Inter_400Regular',
     },
     activeTabText: {
         color: '#007AFF',
         fontWeight: 'bold',
+        fontFamily: 'Inter_600SemiBold',
     },
 });

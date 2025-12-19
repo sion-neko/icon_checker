@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Image, Text, StyleSheet } from 'react-native';
+import { Ionicons, Feather } from '@expo/vector-icons';
 
 interface Props {
     imageUri: string;
@@ -30,7 +31,7 @@ export default function InstagramPreview({ imageUri, displayName, username }: Pr
                         <Text style={styles.username}>{username}</Text>
                         <Text style={styles.location}>Tokyo, Japan</Text>
                     </View>
-                    <Text style={styles.moreIcon}>⋯</Text>
+                    <Feather name="more-horizontal" size={24} color="black" />
                 </View>
 
                 {/* 投稿画像 */}
@@ -42,11 +43,11 @@ export default function InstagramPreview({ imageUri, displayName, username }: Pr
                 {/* アクションボタン */}
                 <View style={styles.actions}>
                     <View style={styles.leftActions}>
-                        <Text style={styles.actionIcon}>❤️</Text>
-                        <Text style={styles.actionIcon}>💬</Text>
-                        <Text style={styles.actionIcon}>✈️</Text>
+                        <Ionicons name="heart-outline" size={28} color="black" style={styles.actionIcon} />
+                        <Ionicons name="chatbubble-outline" size={26} color="black" style={styles.actionIcon} />
+                        <Ionicons name="paper-plane-outline" size={26} color="black" style={styles.actionIcon} />
                     </View>
-                    <Text style={styles.actionIcon}>🔖</Text>
+                    <Ionicons name="bookmark-outline" size={26} color="black" />
                 </View>
 
                 {/* いいね数 */}
@@ -104,6 +105,7 @@ const styles = StyleSheet.create({
     username: {
         fontWeight: '600',
         fontSize: 14,
+        fontFamily: 'Inter_600SemiBold',
     },
     location: {
         fontSize: 11,
@@ -134,6 +136,7 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         paddingHorizontal: 12,
         fontSize: 14,
+        fontFamily: 'Inter_600SemiBold',
     },
     caption: {
         paddingHorizontal: 12,
@@ -141,6 +144,7 @@ const styles = StyleSheet.create({
     },
     captionText: {
         fontSize: 14,
+        fontFamily: 'Inter_400Regular',
     },
     viewComments: {
         paddingHorizontal: 12,
@@ -191,5 +195,6 @@ const styles = StyleSheet.create({
         fontSize: 12,
         marginTop: 4,
         textAlign: 'center',
+        fontFamily: 'Inter_400Regular',
     },
 });

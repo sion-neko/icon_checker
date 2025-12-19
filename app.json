@@ -41,7 +41,8 @@
         {
           "photosPermission": "アイコンプレビュー用の画像を選択します"
         }
-      ]
+      ],
+      "expo-font"
     ],
     "extra": {
       "eas": {
