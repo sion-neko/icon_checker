@@ -14,6 +14,8 @@ import { ActivityIndicator } from 'react-native';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
+const TABS = ['Instagram', 'X', 'LINE'];
+
 export default function App() {
   let [fontsLoaded] = useFonts({
     Inter_400Regular,
@@ -28,7 +30,7 @@ export default function App() {
   const [displayName, setDisplayName] = useState('あなたの名前');
   const [username, setUsername] = useState('your_username');
 
-  const flatListRef = useRef<FlatList>(null);
+  const tabFlatListRef = useRef<FlatList>(null);
 
   // AsyncStorageから保存データを読み込み
   useEffect(() => {
@@ -103,7 +105,11 @@ export default function App() {
 
   const selectImage = (index: number) => {
     setSelectedImageIndex(index);
-    flatListRef.current?.scrollToIndex({ index, animated: true });
+  };
+
+  const handleTabChange = (index: number) => {
+    setActiveTab(index);
+    tabFlatListRef.current?.scrollToIndex({ index, animated: true });
   };
 
   // displayNameが変更されたら自動保存
@@ -132,14 +138,14 @@ export default function App() {
     saveUsername();
   }, [username]);
 
-  const renderPreviewItem = (imageUri: string) => {
+  const renderPreviewItemByTab = (imageUri: string, tabIndex: number) => {
     const props = {
       imageUri,
       displayName,
       username,
     };
 
-    switch (activeTab) {
+    switch (tabIndex) {
       case 0:
         return <InstagramPreview {...props} />;
       case 1:
@@ -258,52 +264,55 @@ export default function App() {
 
       {/* 画像がある場合はタブ + プレビュー */}
       {images.length > 0 && (
-        <FlatList
-          ref={flatListRef}
-          data={images}
-          horizontal
-          pagingEnabled
-          showsHorizontalScrollIndicator={false}
-          keyExtractor={(_, index) => index.toString()}
-          onMomentumScrollEnd={(event) => {
-            const index = Math.round(
-              event.nativeEvent.contentOffset.x / SCREEN_WIDTH
-            );
-            setSelectedImageIndex(index);
-          }}
-          renderItem={({ item }) => (
-            <View style={styles.previewContainer}>
-              {/* 縦スクロールで設定が自然に消える、タブは固定 */}
-              <ScrollView
-                contentContainerStyle={styles.scrollContent}
-                showsVerticalScrollIndicator={false}
-                stickyHeaderIndices={[1]}
-              >
-                {/* 設定（スクロールで消える） */}
-                {renderSettings()}
+        <View style={styles.previewContainer}>
+          {/* 縦スクロールで設定が自然に消える、タブは固定 */}
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            stickyHeaderIndices={[1]}
+          >
+            {/* 設定（スクロールで消える） */}
+            {renderSettings()}
 
-                {/* SNSタブ（スクロール時に上部に固定） */}
-                <View style={styles.tabContainer}>
-                  <Tab
-                    tabs={['Instagram', 'X', 'LINE']}
-                    activeTab={activeTab}
-                    onTabChange={setActiveTab}
-                  />
-                </View>
-
-                {/* プレビュー */}
-                <View style={styles.previewWrapper}>
-                  {renderPreviewItem(item)}
-                </View>
-              </ScrollView>
+            {/* SNSタブ（スクロール時に上部に固定） */}
+            <View style={styles.tabContainer}>
+              <Tab
+                tabs={TABS}
+                activeTab={activeTab}
+                onTabChange={handleTabChange}
+              />
             </View>
-          )}
-          getItemLayout={(_, index) => ({
-            length: SCREEN_WIDTH,
-            offset: SCREEN_WIDTH * index,
-            index,
-          })}
-        />
+
+            {/* プレビュー - 横スワイプでタブ切り替え */}
+            <FlatList
+              ref={tabFlatListRef}
+              data={TABS}
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              keyExtractor={(item) => item}
+              scrollEventThrottle={16}
+              onMomentumScrollEnd={(event) => {
+                const index = Math.round(
+                  event.nativeEvent.contentOffset.x / SCREEN_WIDTH
+                );
+                setActiveTab(index);
+              }}
+              renderItem={({ index: tabIndex }) => (
+                <View style={styles.previewPage}>
+                  <View style={styles.previewWrapper}>
+                    {renderPreviewItemByTab(images[selectedImageIndex], tabIndex)}
+                  </View>
+                </View>
+              )}
+              getItemLayout={(_, index) => ({
+                length: SCREEN_WIDTH,
+                offset: SCREEN_WIDTH * index,
+                index,
+              })}
+            />
+          </ScrollView>
+        </View>
       )}
 
       <StatusBar style="auto" />
@@ -315,6 +324,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+
+  // 画像がある時のメインコンテナ
+  mainContainer: {
+    flex: 1,
+    paddingTop: 50,
   },
 
   // 画像がない時のコンテナ
@@ -489,7 +504,14 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
   },
+  previewScrollContent: {
+    flexGrow: 1,
+    paddingBottom: 20,
+  },
   previewWrapper: {
     padding: 20,
+  },
+  previewPage: {
+    width: SCREEN_WIDTH,
   },
 });
