@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View, Button, ScrollView, TextInput, Text, Image, TouchableOpacity, FlatList, Dimensions } from 'react-native';
+import { StyleSheet, View, ScrollView, TextInput, Text, Image, TouchableOpacity, FlatList, Dimensions } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Feather } from '@expo/vector-icons';
 import { useState, useRef, useEffect } from 'react';
@@ -27,9 +27,6 @@ export default function App() {
 
   const [displayName, setDisplayName] = useState('あなたの名前');
   const [username, setUsername] = useState('your_username');
-
-  // ヘッダーの開閉状態
-  const [isHeaderExpanded, setIsHeaderExpanded] = useState(true);
 
   const flatListRef = useRef<FlatList>(null);
 
@@ -154,6 +151,91 @@ export default function App() {
     }
   };
 
+  // 設定コンポーネント（再利用）
+  const renderSettings = () => (
+    <View style={styles.settingsContainer}>
+      {/* ボタン */}
+      <View style={styles.buttonRow}>
+        <View style={styles.buttonWrapper}>
+          <TouchableOpacity style={styles.actionButton} onPress={addSingleImage}>
+            <Feather name="camera" size={20} color="#fff" style={styles.buttonIcon} />
+            <Text style={styles.actionButtonText}>カメラ</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.buttonWrapper}>
+          <TouchableOpacity style={styles.actionButton} onPress={addLibraryImage}>
+            <Feather name="image" size={20} color="#fff" style={styles.buttonIcon} />
+            <Text style={styles.actionButtonText}>ライブラリ</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* 画像リスト */}
+      {images.length > 0 && (
+        <View style={styles.imageListContainer}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.imageList}
+          >
+            {images.map((img, index) => (
+              <TouchableOpacity
+                key={index}
+                style={[
+                  styles.imageItem,
+                  selectedImageIndex === index && styles.imageItemSelected
+                ]}
+                onPress={() => selectImage(index)}
+              >
+                <Image source={{ uri: img }} style={styles.thumbnail} />
+                {selectedImageIndex === index && (
+                  <View style={styles.selectedBadge}>
+                    <Feather name="check" size={12} color="#fff" />
+                  </View>
+                )}
+                <TouchableOpacity
+                  style={styles.deleteButton}
+                  onPress={() => removeImage(index)}
+                >
+                  <Feather name="x" size={14} color="#fff" />
+                </TouchableOpacity>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      )}
+
+      {/* ユーザー情報入力 */}
+      <View style={styles.inputContainer}>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>表示名</Text>
+          <TextInput
+            style={styles.input}
+            value={displayName}
+            onChangeText={setDisplayName}
+            placeholder="表示名を入力"
+            placeholderTextColor="#999"
+          />
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>ユーザーID</Text>
+          <View style={styles.usernameInput}>
+            <Text style={styles.atSymbol}>@</Text>
+            <TextInput
+              style={[styles.input, styles.usernameField]}
+              value={username}
+              onChangeText={setUsername}
+              placeholder="username"
+              placeholderTextColor="#999"
+              autoCapitalize="none"
+            />
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+
   if (!fontsLoaded) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -164,159 +246,68 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      {/* コンパクトヘッダー */}
-      <View style={styles.compactHeader}>
-        <TouchableOpacity
-          style={styles.toggleButton}
-          onPress={() => setIsHeaderExpanded(!isHeaderExpanded)}
-        >
-          <Feather
-            name={isHeaderExpanded ? 'chevron-down' : 'chevron-right'}
-            size={20}
-            color="#007AFF"
-            style={{ marginRight: 8 }}
-          />
-          <Text style={styles.toggleText}>
-            {isHeaderExpanded ? '設定を閉じる' : '設定を開く'}
-          </Text>
-        </TouchableOpacity>
-
-        {/* 画像数表示 */}
-        {images.length > 0 && (
-          <Text style={styles.imageCount}>
-            {selectedImageIndex + 1}/{images.length}
-          </Text>
-        )}
-      </View>
-
-      {/* 展開可能なヘッダー */}
-      {isHeaderExpanded && (
-        <View style={styles.expandedHeader}>
-          {/* ボタン */}
-          <View style={styles.buttonRow}>
-            <View style={styles.buttonWrapper}>
-              <TouchableOpacity style={styles.actionButton} onPress={addSingleImage}>
-                <Feather name="camera" size={20} color="#fff" style={styles.buttonIcon} />
-                <Text style={styles.actionButtonText}>カメラ</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.buttonWrapper}>
-              <TouchableOpacity style={styles.actionButton} onPress={addLibraryImage}>
-                <Feather name="image" size={20} color="#fff" style={styles.buttonIcon} />
-                <Text style={styles.actionButtonText}>ライブラリ</Text>
-              </TouchableOpacity>
-            </View>
+      {/* 画像がない場合は設定のみ表示 */}
+      {images.length === 0 && (
+        <ScrollView style={styles.noImageContainer}>
+          <View style={styles.header}>
+            <Text style={styles.headerTitle}>Icon Checker</Text>
           </View>
+          {renderSettings()}
+        </ScrollView>
+      )}
 
-          {/* 画像リスト */}
-          {images.length > 0 && (
-            <View style={styles.imageListContainer}>
+      {/* 画像がある場合はタブ + プレビュー */}
+      {images.length > 0 && (
+        <FlatList
+          ref={flatListRef}
+          data={images}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={(_, index) => index.toString()}
+          onMomentumScrollEnd={(event) => {
+            const index = Math.round(
+              event.nativeEvent.contentOffset.x / SCREEN_WIDTH
+            );
+            setSelectedImageIndex(index);
+          }}
+          renderItem={({ item }) => (
+            <View style={styles.previewContainer}>
+              {/* 縦スクロールで設定が自然に消える、タブは固定 */}
               <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={styles.imageList}
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}
+                stickyHeaderIndices={[1]}
               >
-                {images.map((img, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    style={[
-                      styles.imageItem,
-                      selectedImageIndex === index && styles.imageItemSelected
-                    ]}
-                    onPress={() => selectImage(index)}
-                  >
-                    <Image source={{ uri: img }} style={styles.thumbnail} />
-                    {selectedImageIndex === index && (
-                      <View style={styles.selectedBadge}>
-                        <Feather name="check" size={12} color="#fff" />
-                      </View>
-                    )}
-                    <TouchableOpacity
-                      style={styles.deleteButton}
-                      onPress={() => removeImage(index)}
-                    >
-                      <Feather name="x" size={14} color="#fff" />
-                    </TouchableOpacity>
-                  </TouchableOpacity>
-                ))}
+                {/* 設定（スクロールで消える） */}
+                {renderSettings()}
+
+                {/* SNSタブ（スクロール時に上部に固定） */}
+                <View style={styles.tabContainer}>
+                  <Tab
+                    tabs={['Instagram', 'X', 'LINE']}
+                    activeTab={activeTab}
+                    onTabChange={setActiveTab}
+                  />
+                </View>
+
+                {/* プレビュー */}
+                <View style={styles.previewWrapper}>
+                  {renderPreviewItem(item)}
+                </View>
               </ScrollView>
             </View>
           )}
-
-          {/* ユーザー情報入力 */}
-          <View style={styles.inputContainer}>
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>表示名</Text>
-              <TextInput
-                style={styles.input}
-                value={displayName}
-                onChangeText={setDisplayName}
-                placeholder="表示名を入力"
-                placeholderTextColor="#999"
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>ユーザーID</Text>
-              <View style={styles.usernameInput}>
-                <Text style={styles.atSymbol}>@</Text>
-                <TextInput
-                  style={[styles.input, styles.usernameField]}
-                  value={username}
-                  onChangeText={setUsername}
-                  placeholder="username"
-                  placeholderTextColor="#999"
-                  autoCapitalize="none"
-                />
-              </View>
-            </View>
-          </View>
-        </View>
-      )
-      }
-
-      {/* タブとプレビュー */}
-      {
-        images.length > 0 && (
-          <>
-            <Tab
-              tabs={['Instagram', 'X', 'LINE']}
-              activeTab={activeTab}
-              onTabChange={setActiveTab}
-            />
-
-            <FlatList
-              ref={flatListRef}
-              data={images}
-              horizontal
-              pagingEnabled
-              showsHorizontalScrollIndicator={false}
-              keyExtractor={(item, index) => index.toString()}
-              onMomentumScrollEnd={(event) => {
-                const index = Math.round(
-                  event.nativeEvent.contentOffset.x / SCREEN_WIDTH
-                );
-                setSelectedImageIndex(index);
-              }}
-              renderItem={({ item }) => (
-                <View style={styles.previewContainer}>
-                  <ScrollView contentContainerStyle={styles.scrollContent}>
-                    {renderPreviewItem(item)}
-                  </ScrollView>
-                </View>
-              )}
-              getItemLayout={(data, index) => ({
-                length: SCREEN_WIDTH,
-                offset: SCREEN_WIDTH * index,
-                index,
-              })}
-            />
-          </>
-        )
-      }
+          getItemLayout={(_, index) => ({
+            length: SCREEN_WIDTH,
+            offset: SCREEN_WIDTH * index,
+            index,
+          })}
+        />
+      )}
 
       <StatusBar style="auto" />
-    </View >
+    </View>
   );
 }
 
@@ -326,49 +317,31 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
 
-  // コンパクトヘッダー
-  compactHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
+  // 画像がない時のコンテナ
+  noImageContainer: {
+    flex: 1,
     paddingTop: 50,
-    paddingBottom: 12,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 4,
-    zIndex: 100,
-  },
-  toggleButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 8,
-  },
-  toggleIcon: {
-    fontSize: 14,
-    marginRight: 8,
-    color: '#007AFF',
-  },
-  toggleText: {
-    fontSize: 16,
-    color: '#007AFF',
-    fontWeight: '600',
-    fontFamily: 'Inter_600SemiBold',
-  },
-  imageCount: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    fontFamily: 'Inter_600SemiBold',
   },
 
-  // 展開ヘッダー
-  expandedHeader: {
+  header: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+    fontFamily: 'Inter_700Bold',
+  },
+
+  // タブコンテナ（スクロール時に上部固定）
+  tabContainer: {
+    backgroundColor: '#fff',
+    zIndex: 100,
+  },
+
+  // 設定コンテナ
+  settingsContainer: {
     padding: 16,
     backgroundColor: '#fafafa',
     borderBottomWidth: 1,
@@ -387,7 +360,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#007AFF', // iOS Blue
+    backgroundColor: '#007AFF',
     paddingVertical: 12,
     borderRadius: 8,
     shadowColor: '#000',
@@ -440,8 +413,7 @@ const styles = StyleSheet.create({
   selectedBadge: {
     position: 'absolute',
     top: -6,
-    right: -6, // Checkmark on top-right is more common for selection
-    left: 'auto',
+    right: -6,
     backgroundColor: '#007AFF',
     borderRadius: 12,
     width: 22,
@@ -452,16 +424,11 @@ const styles = StyleSheet.create({
     borderColor: '#fff',
     zIndex: 10,
   },
-  selectedBadgeText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
   deleteButton: {
     position: 'absolute',
     top: -6,
     left: -6,
-    backgroundColor: '#FF3B30', // Red for delete
+    backgroundColor: '#FF3B30',
     borderRadius: 12,
     width: 22,
     height: 22,
@@ -470,11 +437,6 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#fff',
     zIndex: 10,
-  },
-  deleteButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
   },
 
   inputContainer: {
@@ -521,8 +483,13 @@ const styles = StyleSheet.create({
   // プレビュー部分
   previewContainer: {
     width: SCREEN_WIDTH,
+    flex: 1,
+    paddingTop: 50,
   },
   scrollContent: {
+    flexGrow: 1,
+  },
+  previewWrapper: {
     padding: 20,
   },
 });
