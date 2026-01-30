@@ -160,17 +160,23 @@ export default function App() {
   // 設定コンポーネント（再利用）
   const renderSettings = () => (
     <View style={styles.settingsContainer}>
+      <Text style={styles.settingsTitle}>プレビュー作成</Text>
+
       {/* ボタン */}
       <View style={styles.buttonRow}>
         <View style={styles.buttonWrapper}>
           <TouchableOpacity style={styles.actionButton} onPress={addSingleImage}>
-            <Feather name="camera" size={20} color="#fff" style={styles.buttonIcon} />
+            <View style={styles.iconCircle}>
+              <Feather name="camera" size={18} color="#007AFF" />
+            </View>
             <Text style={styles.actionButtonText}>カメラ</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.buttonWrapper}>
           <TouchableOpacity style={styles.actionButton} onPress={addLibraryImage}>
-            <Feather name="image" size={20} color="#fff" style={styles.buttonIcon} />
+            <View style={styles.iconCircle}>
+              <Feather name="image" size={18} color="#007AFF" />
+            </View>
             <Text style={styles.actionButtonText}>ライブラリ</Text>
           </TouchableOpacity>
         </View>
@@ -179,32 +185,36 @@ export default function App() {
       {/* 画像リスト */}
       {images.length > 0 && (
         <View style={styles.imageListContainer}>
+          <Text style={styles.label}>選択中の画像</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             style={styles.imageList}
+            contentContainerStyle={styles.imageListContent}
           >
             {images.map((img, index) => (
               <TouchableOpacity
                 key={index}
                 style={[
                   styles.imageItem,
-                  selectedImageIndex === index && styles.imageItemSelected
+                  selectedImageIndex === index && styles.imageItemSelectedActive
                 ]}
                 onPress={() => selectImage(index)}
+                activeOpacity={0.8}
               >
                 <Image source={{ uri: img }} style={styles.thumbnail} />
-                {selectedImageIndex === index && (
-                  <View style={styles.selectedBadge}>
-                    <Feather name="check" size={12} color="#fff" />
+                {selectedImageIndex === index ? (
+                  <View style={styles.selectedIndicator}>
+                    <Feather name="check" size={14} color="#fff" />
                   </View>
+                ) : (
+                  <TouchableOpacity
+                    style={styles.deleteButtonSmall}
+                    onPress={() => removeImage(index)}
+                  >
+                    <Feather name="x" size={12} color="#fff" />
+                  </TouchableOpacity>
                 )}
-                <TouchableOpacity
-                  style={styles.deleteButton}
-                  onPress={() => removeImage(index)}
-                >
-                  <Feather name="x" size={14} color="#fff" />
-                </TouchableOpacity>
               </TouchableOpacity>
             ))}
           </ScrollView>
@@ -219,7 +229,7 @@ export default function App() {
             style={styles.input}
             value={displayName}
             onChangeText={setDisplayName}
-            placeholder="表示名を入力"
+            placeholder="あなたの名前を表示"
             placeholderTextColor="#999"
           />
         </View>
@@ -339,14 +349,16 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: '#fff',
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: 28,
+    fontWeight: '800',
+    color: '#1a1a1a',
     fontFamily: 'Inter_700Bold',
+    letterSpacing: -0.5,
   },
 
   // タブコンテナ（スクロール時に上部固定）
@@ -363,95 +375,114 @@ const styles = StyleSheet.create({
     borderBottomColor: '#e5e5e5',
   },
 
+  settingsTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#000',
+    marginBottom: 20,
+    fontFamily: 'Inter_700Bold',
+  },
   buttonRow: {
     flexDirection: 'row',
-    gap: 12,
-    marginBottom: 20,
+    gap: 16,
+    marginBottom: 24,
   },
   buttonWrapper: {
     flex: 1,
   },
   actionButton: {
-    flexDirection: 'row',
+    flexDirection: 'column', // Stack icon and text
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#007AFF',
-    paddingVertical: 12,
-    borderRadius: 8,
+    backgroundColor: '#fff', // White buttons
+    paddingVertical: 16,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#f0f0f0',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 3,
+  },
+  iconCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#f0f7ff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
   },
   buttonIcon: {
     marginRight: 8,
   },
   actionButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
+    color: '#333',
+    fontSize: 14,
+    fontWeight: '700',
     fontFamily: 'Inter_600SemiBold',
   },
 
   imageListContainer: {
-    marginBottom: 16,
+    marginBottom: 24,
   },
   imageList: {
-    marginBottom: 8,
+    marginTop: 12,
+  },
+  imageListContent: {
+    paddingRight: 20,
   },
   imageItem: {
-    marginRight: 12,
+    marginRight: 16,
     position: 'relative',
-    borderWidth: 3,
-    borderColor: 'transparent',
-    borderRadius: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    borderRadius: 18,
+    backgroundColor: '#fff',
+    padding: 3,
   },
-  imageItemSelected: {
-    borderColor: '#007AFF',
+  imageItemSelectedActive: {
     shadowColor: '#007AFF',
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
+    shadowRadius: 10,
+    elevation: 8,
   },
   thumbnail: {
-    width: 70,
-    height: 70,
-    borderRadius: 10,
+    width: 80,
+    height: 80,
+    borderRadius: 15,
     backgroundColor: '#f0f0f0',
   },
-  selectedBadge: {
+  selectedIndicator: {
+    position: 'absolute',
+    bottom: -6,
+    right: -6,
+    backgroundColor: '#007AFF',
+    borderRadius: 15,
+    width: 28,
+    height: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 4,
+  },
+  deleteButtonSmall: {
     position: 'absolute',
     top: -6,
     right: -6,
-    backgroundColor: '#007AFF',
+    backgroundColor: 'rgba(255, 59, 48, 0.9)',
     borderRadius: 12,
-    width: 22,
-    height: 22,
+    width: 24,
+    height: 24,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
     borderColor: '#fff',
-    zIndex: 10,
-  },
-  deleteButton: {
-    position: 'absolute',
-    top: -6,
-    left: -6,
-    backgroundColor: '#FF3B30',
-    borderRadius: 12,
-    width: 22,
-    height: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#fff',
-    zIndex: 10,
   },
 
   inputContainer: {
@@ -468,21 +499,21 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_600SemiBold',
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 10,
-    fontSize: 15,
-    backgroundColor: '#fff',
+    borderWidth: 0, // No border
+    borderRadius: 12, // More rounded
+    padding: 14, // More padding
+    fontSize: 16,
+    backgroundColor: '#f5f5f5', // Light gray background
     fontFamily: 'Inter_400Regular',
+    color: '#1a1a1a',
   },
   usernameInput: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    backgroundColor: '#fff',
+    borderWidth: 0, // No border
+    borderRadius: 12,
+    backgroundColor: '#f5f5f5', // Light gray background
+    paddingHorizontal: 4,
   },
   atSymbol: {
     paddingLeft: 12,

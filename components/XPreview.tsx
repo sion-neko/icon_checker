@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Image, Text, StyleSheet } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import { Feather, FontAwesome6 } from '@expo/vector-icons';
 
 interface Props {
     imageUri: string;
@@ -21,6 +21,11 @@ export default function XPreview({ imageUri, displayName, username }: Props) {
                     <View style={styles.avatarContainer}>
                         <Image source={{ uri: imageUri }} style={styles.profileAvatar} />
                     </View>
+                    <View style={styles.editButtonContainer}>
+                        <View style={styles.editButton}>
+                            <Text style={styles.editButtonText}>編集</Text>
+                        </View>
+                    </View>
                 </View>
 
                 {/* プロフィール情報 */}
@@ -33,16 +38,16 @@ export default function XPreview({ imageUri, displayName, username }: Props) {
                     </Text>
                     <View style={styles.profileStats}>
                         <Text style={styles.stat}>
-                            <Text style={styles.statNumber}>123</Text> Following
+                            <Text style={styles.statNumber}>123</Text> <Text style={styles.statLabel}>Following</Text>
                         </Text>
                         <Text style={styles.stat}>
-                            <Text style={styles.statNumber}>456</Text> Followers
+                            <Text style={styles.statNumber}>456</Text> <Text style={styles.statLabel}>Followers</Text>
                         </Text>
                     </View>
                 </View>
             </View>
 
-            {/* タイムライン投稿 */}
+            {/* タイムライン投稿 1 */}
             <View style={styles.tweet}>
                 <Image source={{ uri: imageUri }} style={styles.avatar} />
 
@@ -70,7 +75,7 @@ export default function XPreview({ imageUri, displayName, username }: Props) {
                             <Text style={styles.actionCount}>12</Text>
                         </View>
                         <View style={styles.action}>
-                            <Feather name="repeat" size={18} color="#536471" />
+                            <FontAwesome6 name="retweet" size={16} color="#536471" />
                             <Text style={styles.actionCount}>34</Text>
                         </View>
                         <View style={styles.action}>
@@ -88,7 +93,30 @@ export default function XPreview({ imageUri, displayName, username }: Props) {
                 </View>
             </View>
 
+            {/* 通知プレビュー */}
+            <View style={styles.notificationSection}>
+                <Text style={styles.sectionTitle}>通知</Text>
 
+                <View style={styles.notification}>
+                    <Feather name="heart" size={24} color="#f91880" style={styles.notificationIcon} />
+                    <View style={styles.notificationContent}>
+                        <Image source={{ uri: imageUri }} style={styles.notificationAvatar} />
+                        <Text style={styles.notificationText}>
+                            <Text style={styles.notificationBold}>田中太郎</Text>さんがあなたの投稿をいいねしました
+                        </Text>
+                    </View>
+                </View>
+
+                <View style={styles.notification}>
+                    <FontAwesome6 name="user-plus" size={18} color="#1d9bf0" style={styles.notificationIcon} />
+                    <View style={styles.notificationContent}>
+                        <Image source={{ uri: imageUri }} style={styles.notificationAvatar} />
+                        <Text style={styles.notificationText}>
+                            <Text style={styles.notificationBold}>佐藤花子</Text>さんにフォローされました
+                        </Text>
+                    </View>
+                </View>
+            </View>
         </View>
     );
 }
@@ -103,16 +131,14 @@ const styles = StyleSheet.create({
     tweet: {
         flexDirection: 'row',
         padding: 12,
-        borderWidth: 1,
-        borderColor: '#eff3f4',
-        borderRadius: 8,
-        marginBottom: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: '#eff3f4',
         backgroundColor: '#fff',
     },
     avatar: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
+        width: 48, // Standard X avatar size in timeline
+        height: 48,
+        borderRadius: 24,
         marginRight: 12,
     },
     content: {
@@ -121,11 +147,12 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 4,
+        marginBottom: 2,
     },
     displayName: {
         fontWeight: 'bold',
         fontSize: 15,
+        color: '#0f1419',
         marginRight: 4,
         fontFamily: 'Inter_700Bold',
     },
@@ -152,13 +179,14 @@ const styles = StyleSheet.create({
     tweetText: {
         fontSize: 15,
         lineHeight: 20,
+        color: '#0f1419',
         marginBottom: 12,
         fontFamily: 'Inter_400Regular',
     },
     actions: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        maxWidth: 425,
+        paddingRight: 40,
     },
     action: {
         flexDirection: 'row',
@@ -176,22 +204,22 @@ const styles = StyleSheet.create({
 
     // プロフィール部分
     profile: {
-        borderWidth: 1,
-        borderColor: '#eff3f4',
-        borderRadius: 8,
-        overflow: 'hidden',
+        borderBottomWidth: 1,
+        borderBottomColor: '#eff3f4',
         backgroundColor: '#fff',
     },
     sectionTitle: {
         fontSize: 12,
-        fontWeight: '600',
+        fontWeight: '700',
         color: '#536471',
         padding: 12,
         backgroundColor: '#f7f9f9',
         textTransform: 'uppercase',
+        letterSpacing: 1,
     },
     profileHeader: {
         position: 'relative',
+        height: 140,
     },
     coverPhoto: {
         width: '100%',
@@ -200,24 +228,42 @@ const styles = StyleSheet.create({
     },
     avatarContainer: {
         position: 'absolute',
-        bottom: -40,
+        bottom: 0,
         left: 16,
         borderWidth: 4,
         borderColor: '#fff',
-        borderRadius: 68,
+        borderRadius: 44,
     },
     profileAvatar: {
-        width: 68,
-        height: 68,
-        borderRadius: 34,
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+    },
+    editButtonContainer: {
+        position: 'absolute',
+        bottom: 8,
+        right: 16,
+    },
+    editButton: {
+        borderWidth: 1,
+        borderColor: '#cfd9de',
+        borderRadius: 20,
+        paddingHorizontal: 16,
+        paddingVertical: 6,
+    },
+    editButtonText: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: '#0f1419',
     },
     profileInfo: {
         padding: 16,
-        paddingTop: 50,
+        paddingTop: 12,
     },
     profileName: {
         fontSize: 20,
-        fontWeight: 'bold',
+        fontWeight: '800',
+        color: '#0f1419',
         fontFamily: 'Inter_700Bold',
     },
     profileUsername: {
@@ -229,6 +275,7 @@ const styles = StyleSheet.create({
     bio: {
         fontSize: 15,
         lineHeight: 20,
+        color: '#0f1419',
         marginBottom: 12,
     },
     profileStats: {
@@ -237,11 +284,50 @@ const styles = StyleSheet.create({
     },
     stat: {
         fontSize: 14,
+    },
+    statLabel: {
         color: '#536471',
     },
     statNumber: {
         fontWeight: 'bold',
         color: '#0f1419',
+        fontFamily: 'Inter_700Bold',
+    },
+
+    // 通知セクション
+    notificationSection: {
+        backgroundColor: '#fff',
+        marginTop: 0,
+    },
+    notification: {
+        flexDirection: 'row',
+        padding: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: '#eff3f4',
+        alignItems: 'flex-start',
+    },
+    notificationIcon: {
+        marginRight: 12,
+        width: 28,
+        textAlign: 'center',
+    },
+    notificationContent: {
+        flex: 1,
+    },
+    notificationAvatar: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        marginBottom: 8,
+    },
+    notificationText: {
+        fontSize: 15,
+        color: '#0f1419',
+        fontFamily: 'Inter_400Regular',
+        lineHeight: 20,
+    },
+    notificationBold: {
+        fontWeight: 'bold',
         fontFamily: 'Inter_700Bold',
     },
 });

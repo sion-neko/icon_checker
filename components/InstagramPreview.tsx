@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Image, Text, StyleSheet } from 'react-native';
 import { Ionicons, Feather } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 
 interface Props {
     imageUri: string;
@@ -15,9 +16,16 @@ export default function InstagramPreview({ imageUri, displayName, username }: Pr
             <View style={styles.stories}>
                 <Text style={styles.sectionTitle}>ストーリーズ</Text>
                 <View style={styles.storyItem}>
-                    <View style={styles.storyRing}>
-                        <Image source={{ uri: imageUri }} style={styles.storyAvatar} />
-                    </View>
+                    <LinearGradient
+                        colors={['#feda75', '#fa7e1e', '#d62976', '#962fbf', '#4f5bd5']}
+                        start={{ x: 0, y: 1 }}
+                        end={{ x: 1, y: 0 }}
+                        style={styles.storyRing}
+                    >
+                        <View style={styles.storyInnerRing}>
+                            <Image source={{ uri: imageUri }} style={styles.storyAvatar} />
+                        </View>
+                    </LinearGradient>
                     <Text style={styles.storyName}>{displayName}</Text>
                 </View>
             </View>
@@ -67,13 +75,10 @@ export default function InstagramPreview({ imageUri, displayName, username }: Pr
                 <Text style={styles.viewComments}>View all 42 comments</Text>
                 <Text style={styles.timestamp}>2 HOURS AGO</Text>
             </View>
-
-
         </View>
     );
 }
 
-// styles は前回と同じ
 const styles = StyleSheet.create({
     container: {
         width: '100%',
@@ -179,17 +184,23 @@ const styles = StyleSheet.create({
         width: 80,
     },
     storyRing: {
-        padding: 3,
-        borderRadius: 50,
-        borderWidth: 2,
-        borderColor: '#c13584',
+        padding: 2, // Gradient width
+        width: 72,
+        height: 72,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 36,
+    },
+    storyInnerRing: {
+        padding: 3, // White gap
+        backgroundColor: '#fff',
+        borderRadius: 34,
     },
     storyAvatar: {
         width: 60,
         height: 60,
         borderRadius: 30,
-        borderWidth: 3,
-        borderColor: '#fff',
+        borderWidth: 0,
     },
     storyName: {
         fontSize: 12,
