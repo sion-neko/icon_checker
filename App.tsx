@@ -53,32 +53,6 @@ export default function App() {
     loadUserData();
   }, []);
 
-  const addSingleImage = async () => {
-    try {
-      // カメラの権限をリクエスト（必要な場合）
-      const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
-
-      if (permissionResult.granted === false) {
-        alert("カメラへのアクセス許可が必要です。");
-        return;
-      }
-
-      const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 1,
-      });
-
-      if (!result.canceled) {
-        setImages([...images, result.assets[0].uri]);
-        setSelectedImageIndex(images.length);
-      }
-    } catch (error) {
-      console.log('Error launching camera:', error);
-    }
-  };
-
   const addLibraryImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -164,14 +138,6 @@ export default function App() {
 
       {/* ボタン */}
       <View style={styles.buttonRow}>
-        <View style={styles.buttonWrapper}>
-          <TouchableOpacity style={styles.actionButton} onPress={addSingleImage}>
-            <View style={styles.iconCircle}>
-              <Feather name="camera" size={18} color="#007AFF" />
-            </View>
-            <Text style={styles.actionButtonText}>カメラ</Text>
-          </TouchableOpacity>
-        </View>
         <View style={styles.buttonWrapper}>
           <TouchableOpacity style={styles.actionButton} onPress={addLibraryImage}>
             <View style={styles.iconCircle}>
@@ -306,10 +272,6 @@ export default function App() {
         <TouchableOpacity style={styles.primaryButton} onPress={addLibraryImage}>
           <Feather name="image" size={20} color="#fff" />
           <Text style={styles.primaryButtonText}>画像を選択</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.secondaryButton} onPress={addSingleImage}>
-          <Feather name="camera" size={20} color="#007AFF" />
-          <Text style={styles.secondaryButtonText}>カメラで撮影</Text>
         </TouchableOpacity>
       </View>
     </View>
