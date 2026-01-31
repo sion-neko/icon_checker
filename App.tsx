@@ -136,56 +136,50 @@ export default function App() {
     <View style={styles.settingsContainer}>
       <Text style={styles.settingsTitle}>プレビュー作成</Text>
 
-      {/* ボタン */}
-      <View style={styles.buttonRow}>
-        <View style={styles.buttonWrapper}>
-          <TouchableOpacity style={styles.actionButton} onPress={addLibraryImage}>
-            <View style={styles.iconCircle}>
-              <Feather name="image" size={18} color="#007AFF" />
-            </View>
-            <Text style={styles.actionButtonText}>ライブラリ</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
       {/* 画像リスト */}
-      {images.length > 0 && (
-        <View style={styles.imageListContainer}>
-          <Text style={styles.label}>選択中の画像</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.imageList}
-            contentContainerStyle={styles.imageListContent}
+      <View style={styles.imageListContainer}>
+        <Text style={styles.label}>選択中の画像</Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.imageList}
+          contentContainerStyle={styles.imageListContent}
+        >
+          {images.map((img, index) => (
+            <TouchableOpacity
+              key={index}
+              style={[
+                styles.imageItem,
+                selectedImageIndex === index && styles.imageItemSelectedActive
+              ]}
+              onPress={() => selectImage(index)}
+              activeOpacity={0.8}
+            >
+              <Image source={{ uri: img }} style={styles.thumbnail} />
+              {selectedImageIndex === index ? (
+                <View style={styles.selectedIndicator}>
+                  <Feather name="check" size={14} color="#fff" />
+                </View>
+              ) : (
+                <TouchableOpacity
+                  style={styles.deleteButtonSmall}
+                  onPress={() => removeImage(index)}
+                >
+                  <Feather name="x" size={12} color="#fff" />
+                </TouchableOpacity>
+              )}
+            </TouchableOpacity>
+          ))}
+          {/* 追加ボタン */}
+          <TouchableOpacity
+            style={styles.addImageButton}
+            onPress={addLibraryImage}
+            activeOpacity={0.7}
           >
-            {images.map((img, index) => (
-              <TouchableOpacity
-                key={index}
-                style={[
-                  styles.imageItem,
-                  selectedImageIndex === index && styles.imageItemSelectedActive
-                ]}
-                onPress={() => selectImage(index)}
-                activeOpacity={0.8}
-              >
-                <Image source={{ uri: img }} style={styles.thumbnail} />
-                {selectedImageIndex === index ? (
-                  <View style={styles.selectedIndicator}>
-                    <Feather name="check" size={14} color="#fff" />
-                  </View>
-                ) : (
-                  <TouchableOpacity
-                    style={styles.deleteButtonSmall}
-                    onPress={() => removeImage(index)}
-                  >
-                    <Feather name="x" size={12} color="#fff" />
-                  </TouchableOpacity>
-                )}
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-      )}
+            <Feather name="plus" size={24} color="#007AFF" />
+          </TouchableOpacity>
+        </ScrollView>
+      </View>
 
       {/* ユーザー情報入力 */}
       <View style={styles.inputContainer}>
@@ -609,7 +603,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   buttonWrapper: {
-    flex: 1,
+    width: '48%',
   },
   actionButton: {
     flexDirection: 'column', // Stack icon and text
@@ -673,6 +667,17 @@ const styles = StyleSheet.create({
     height: 80,
     borderRadius: 15,
     backgroundColor: '#f0f0f0',
+  },
+  addImageButton: {
+    width: 80,
+    height: 80,
+    borderRadius: 15,
+    borderWidth: 2,
+    borderColor: '#d0d0d0',
+    borderStyle: 'dashed',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fafafa',
   },
   selectedIndicator: {
     position: 'absolute',
