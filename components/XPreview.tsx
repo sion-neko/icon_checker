@@ -102,7 +102,7 @@ export default function XPreview({ imageUri, displayName, username }: Props) {
                     <View style={styles.notificationContent}>
                         <Image source={{ uri: imageUri }} style={styles.notificationAvatar} />
                         <Text style={styles.notificationText}>
-                            <Text style={styles.notificationBold}>田中太郎</Text>さんがあなたの投稿をいいねしました
+                            <Text style={[styles.notificationBold, styles.username]}>@{username}</Text>さんがあなたの投稿をいいねしました
                         </Text>
                     </View>
                 </View>
@@ -112,7 +112,7 @@ export default function XPreview({ imageUri, displayName, username }: Props) {
                     <View style={styles.notificationContent}>
                         <Image source={{ uri: imageUri }} style={styles.notificationAvatar} />
                         <Text style={styles.notificationText}>
-                            <Text style={styles.notificationBold}>佐藤花子</Text>さんにフォローされました
+                            <Text style={[styles.notificationBold, styles.username]}>@{username}</Text>さんにフォローされました
                         </Text>
                     </View>
                 </View>
