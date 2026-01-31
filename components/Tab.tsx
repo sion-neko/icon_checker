@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Animated, Dimensions } from 'react-native';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -7,19 +7,20 @@ interface TabProps {
     tabs: string[];
     activeTab: number;
     onTabChange: (index: number) => void;
+    scrollX?: Animated.Value;
 }
 
-export default function Tab({ tabs, activeTab, onTabChange }: TabProps) {
+export default function Tab({ tabs, activeTab, onTabChange, scrollX }: TabProps) {
     const tabWidth = SCREEN_WIDTH / tabs.length;
-    const translateX = useRef(new Animated.Value(0)).current;
 
-    useEffect(() => {
-        Animated.spring(translateX, {
-            toValue: activeTab * tabWidth,
-            useNativeDriver: true,
-            bounciness: 4,
-        }).start();
-    }, [activeTab, tabWidth]);
+    // scrollXがある場合はスクロール位置に連動、ない場合はactiveTabに基づく
+    const translateX = scrollX
+        ? scrollX.interpolate({
+            inputRange: tabs.map((_, i) => i * SCREEN_WIDTH),
+            outputRange: tabs.map((_, i) => i * tabWidth),
+            extrapolate: 'clamp',
+        })
+        : activeTab * tabWidth;
 
     return (
         <View style={styles.outerContainer}>

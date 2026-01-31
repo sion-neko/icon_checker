@@ -3,6 +3,7 @@ import { StyleSheet, View, ScrollView, TextInput, Text, Image, TouchableOpacity,
 import * as ImagePicker from 'expo-image-picker';
 import { Feather } from '@expo/vector-icons';
 import { useState, useRef, useEffect } from 'react';
+import { Animated as RNAnimated } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import InstagramPreview from './components/InstagramPreview';
 import XPreview from './components/XPreview';
@@ -31,6 +32,7 @@ export default function App() {
   const [username, setUsername] = useState('your_username');
 
   const tabFlatListRef = useRef<FlatList>(null);
+  const scrollX = useRef(new RNAnimated.Value(0)).current;
 
   // AsyncStorageから保存データを読み込み
   useEffect(() => {
@@ -329,11 +331,12 @@ export default function App() {
                 tabs={TABS}
                 activeTab={activeTab}
                 onTabChange={handleTabChange}
+                scrollX={scrollX}
               />
             </View>
 
             {/* プレビュー - 横スワイプでタブ切り替え */}
-            <FlatList
+            <RNAnimated.FlatList
               ref={tabFlatListRef}
               data={TABS}
               horizontal
@@ -341,6 +344,10 @@ export default function App() {
               showsHorizontalScrollIndicator={false}
               keyExtractor={(item) => item}
               scrollEventThrottle={16}
+              onScroll={RNAnimated.event(
+                [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+                { useNativeDriver: true }
+              )}
               onMomentumScrollEnd={(event) => {
                 const index = Math.round(
                   event.nativeEvent.contentOffset.x / SCREEN_WIDTH
