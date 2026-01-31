@@ -156,18 +156,12 @@ export default function App() {
               activeOpacity={0.8}
             >
               <Image source={{ uri: img }} style={styles.thumbnail} />
-              {selectedImageIndex === index ? (
-                <View style={styles.selectedIndicator}>
-                  <Feather name="check" size={14} color="#fff" />
-                </View>
-              ) : (
-                <TouchableOpacity
-                  style={styles.deleteButtonSmall}
-                  onPress={() => removeImage(index)}
-                >
-                  <Feather name="x" size={12} color="#fff" />
-                </TouchableOpacity>
-              )}
+              <TouchableOpacity
+                style={styles.deleteButtonSmall}
+                onPress={() => removeImage(index)}
+              >
+                <Feather name="x" size={12} color="#fff" />
+              </TouchableOpacity>
             </TouchableOpacity>
           ))}
           {/* 追加ボタン */}
@@ -647,6 +641,7 @@ const styles = StyleSheet.create({
   },
   imageListContent: {
     paddingRight: 20,
+    paddingTop: 10,
   },
   imageItem: {
     marginRight: 16,
@@ -654,13 +649,12 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     backgroundColor: '#fff',
     padding: 3,
+    borderWidth: 2,
+    borderColor: '#e0e0e0',
   },
   imageItemSelectedActive: {
-    shadowColor: '#007AFF',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 8,
+    borderWidth: 3,
+    borderColor: '#007AFF',
   },
   thumbnail: {
     width: 80,
@@ -678,24 +672,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#fafafa',
-  },
-  selectedIndicator: {
-    position: 'absolute',
-    bottom: -6,
-    right: -6,
-    backgroundColor: '#007AFF',
-    borderRadius: 15,
-    width: 28,
-    height: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 3,
-    borderColor: '#fff',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 4,
   },
   deleteButtonSmall: {
     position: 'absolute',
