@@ -260,15 +260,104 @@ export default function App() {
     );
   }
 
+  // 空状態のイラスト
+  const renderEmptyState = () => (
+    <View style={styles.emptyStateContainer}>
+      {/* イラスト部分 */}
+      <View style={styles.illustrationContainer}>
+        <View style={styles.illustrationBg}>
+          <View style={styles.mockPhone}>
+            <View style={styles.mockPhoneScreen}>
+              {/* SNSアイコンのモック */}
+              <View style={styles.mockProfileRow}>
+                <View style={styles.mockAvatar}>
+                  <Feather name="user" size={24} color="#c0c0c0" />
+                </View>
+                <View style={styles.mockLines}>
+                  <View style={styles.mockLine} />
+                  <View style={[styles.mockLine, styles.mockLineShort]} />
+                </View>
+              </View>
+              <View style={styles.mockPost} />
+            </View>
+          </View>
+          {/* 装飾アイコン */}
+          <View style={[styles.floatingIcon, styles.floatingIconInstagram]}>
+            <Feather name="instagram" size={20} color="#E1306C" />
+          </View>
+          <View style={[styles.floatingIcon, styles.floatingIconX]}>
+            <Feather name="twitter" size={20} color="#000" />
+          </View>
+          <View style={[styles.floatingIcon, styles.floatingIconLine]}>
+            <Feather name="message-circle" size={20} color="#06C755" />
+          </View>
+        </View>
+      </View>
+
+      {/* テキスト */}
+      <Text style={styles.emptyStateTitle}>SNSアイコンをチェック</Text>
+      <Text style={styles.emptyStateDescription}>
+        プロフィール画像がSNSでどう見えるか{'\n'}
+        投稿前に確認できます
+      </Text>
+
+      {/* ボタン */}
+      <View style={styles.emptyStateButtons}>
+        <TouchableOpacity style={styles.primaryButton} onPress={addLibraryImage}>
+          <Feather name="image" size={20} color="#fff" />
+          <Text style={styles.primaryButtonText}>画像を選択</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.secondaryButton} onPress={addSingleImage}>
+          <Feather name="camera" size={20} color="#007AFF" />
+          <Text style={styles.secondaryButtonText}>カメラで撮影</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
-      {/* 画像がない場合は設定のみ表示 */}
+      {/* 画像がない場合は空状態UI */}
       {images.length === 0 && (
-        <ScrollView style={styles.noImageContainer}>
+        <ScrollView
+          style={styles.noImageContainer}
+          contentContainerStyle={styles.noImageContent}
+        >
           <View style={styles.header}>
             <Text style={styles.headerTitle}>Icon Checker</Text>
           </View>
-          {renderSettings()}
+          {renderEmptyState()}
+
+          {/* ユーザー情報入力（折りたたみ風） */}
+          <View style={styles.userInfoSection}>
+            <Text style={styles.userInfoSectionTitle}>プロフィール設定</Text>
+            <View style={styles.inputContainer}>
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>表示名</Text>
+                <TextInput
+                  style={styles.input}
+                  value={displayName}
+                  onChangeText={setDisplayName}
+                  placeholder="あなたの名前を表示"
+                  placeholderTextColor="#999"
+                />
+              </View>
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>ユーザーID</Text>
+                <View style={styles.usernameInput}>
+                  <Text style={styles.atSymbol}>@</Text>
+                  <TextInput
+                    style={[styles.input, styles.usernameField]}
+                    value={username}
+                    onChangeText={setUsername}
+                    placeholder="username"
+                    placeholderTextColor="#999"
+                    autoCapitalize="none"
+                  />
+                </View>
+              </View>
+            </View>
+          </View>
         </ScrollView>
       )}
 
@@ -346,6 +435,176 @@ const styles = StyleSheet.create({
   noImageContainer: {
     flex: 1,
     paddingTop: 50,
+  },
+  noImageContent: {
+    flexGrow: 1,
+    paddingBottom: 40,
+  },
+
+  // 空状態UI
+  emptyStateContainer: {
+    alignItems: 'center',
+    paddingHorizontal: 32,
+    paddingTop: 20,
+    paddingBottom: 32,
+  },
+  illustrationContainer: {
+    marginBottom: 24,
+  },
+  illustrationBg: {
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: '#f0f7ff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  mockPhone: {
+    width: 100,
+    height: 140,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 5,
+  },
+  mockPhoneScreen: {
+    flex: 1,
+    backgroundColor: '#fafafa',
+    borderRadius: 8,
+    padding: 8,
+  },
+  mockProfileRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  mockAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#e8e8e8',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  mockLines: {
+    flex: 1,
+  },
+  mockLine: {
+    height: 6,
+    backgroundColor: '#e0e0e0',
+    borderRadius: 3,
+    marginBottom: 4,
+  },
+  mockLineShort: {
+    width: '60%',
+  },
+  mockPost: {
+    flex: 1,
+    backgroundColor: '#e8e8e8',
+    borderRadius: 6,
+  },
+  floatingIcon: {
+    position: 'absolute',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  floatingIconInstagram: {
+    top: 20,
+    right: 10,
+  },
+  floatingIconX: {
+    bottom: 30,
+    right: 0,
+  },
+  floatingIconLine: {
+    bottom: 20,
+    left: 10,
+  },
+  emptyStateTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#1a1a1a',
+    marginBottom: 8,
+    fontFamily: 'Inter_700Bold',
+    textAlign: 'center',
+  },
+  emptyStateDescription: {
+    fontSize: 15,
+    color: '#666',
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 28,
+    fontFamily: 'Inter_400Regular',
+  },
+  emptyStateButtons: {
+    width: '100%',
+    gap: 12,
+  },
+  primaryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#007AFF',
+    paddingVertical: 16,
+    borderRadius: 14,
+    gap: 8,
+    shadowColor: '#007AFF',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  primaryButtonText: {
+    color: '#fff',
+    fontSize: 17,
+    fontWeight: '600',
+    fontFamily: 'Inter_600SemiBold',
+  },
+  secondaryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+    paddingVertical: 16,
+    borderRadius: 14,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: '#e5e5e5',
+  },
+  secondaryButtonText: {
+    color: '#007AFF',
+    fontSize: 17,
+    fontWeight: '600',
+    fontFamily: 'Inter_600SemiBold',
+  },
+  userInfoSection: {
+    marginTop: 8,
+    marginHorizontal: 16,
+    padding: 16,
+    backgroundColor: '#fafafa',
+    borderRadius: 16,
+  },
+  userInfoSectionTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#666',
+    marginBottom: 16,
+    fontFamily: 'Inter_600SemiBold',
   },
 
   header: {
