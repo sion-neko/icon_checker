@@ -98,7 +98,7 @@ export default function XPreview({ imageUri, displayName, username }: Props) {
                 <Text style={styles.sectionTitle}>通知</Text>
 
                 <View style={styles.notification}>
-                    <Feather name="heart" size={24} color="#f91880" style={styles.notificationIcon} />
+                    <FontAwesome6 name="heart" size={24} color="#f91880" style={styles.notificationIcon} solid />
                     <View style={styles.notificationContent}>
                         <Image source={{ uri: imageUri }} style={styles.notificationAvatar} />
                         <Text style={styles.notificationText}>
