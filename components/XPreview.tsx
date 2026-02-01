@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Image, Text, StyleSheet, ImageBackground } from 'react-native';
+import { View, Image, Text, StyleSheet } from 'react-native';
 import { Feather, FontAwesome6 } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
 
 interface Props {
     imageUri: string;
@@ -17,13 +18,15 @@ export default function XPreview({ imageUri, displayName, username }: Props) {
 
                 {/* ヘッダー画像 */}
                 <View style={styles.profileHeader}>
-                    <ImageBackground
-                        source={{ uri: imageUri }}
-                        style={styles.coverPhoto}
-                        blurRadius={20}
-                    >
+                    <View style={styles.coverPhoto}>
+                        <Image
+                            key={imageUri}
+                            source={{ uri: imageUri }}
+                            style={styles.coverImage}
+                        />
+                        <BlurView intensity={30} tint="light" style={styles.coverBlur} />
                         <View style={styles.coverOverlay} />
-                    </ImageBackground>
+                    </View>
                     <View style={styles.avatarContainer}>
                         <Image source={{ uri: imageUri }} style={styles.profileAvatar} />
                     </View>
@@ -178,10 +181,6 @@ const styles = StyleSheet.create({
     spacer: {
         flex: 1,
     },
-    moreIcon: {
-        fontSize: 18,
-        color: '#536471',
-    },
     tweetText: {
         fontSize: 15,
         lineHeight: 20,
@@ -198,10 +197,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 4,
-    },
-    actionIcon: {
-        fontSize: 18,
-        color: '#536471',
     },
     actionCount: {
         fontSize: 13,
@@ -231,6 +226,16 @@ const styles = StyleSheet.create({
         width: '100%',
         height: 100,
         backgroundColor: '#cfd9de',
+        overflow: 'hidden',
+    },
+    coverImage: {
+        ...StyleSheet.absoluteFillObject,
+        width: '100%',
+        height: '100%',
+        resizeMode: 'cover',
+    },
+    coverBlur: {
+        ...StyleSheet.absoluteFillObject,
     },
     coverOverlay: {
         ...StyleSheet.absoluteFillObject,

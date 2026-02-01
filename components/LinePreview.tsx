@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Image, Text, StyleSheet, ImageBackground } from 'react-native';
+import { View, Image, Text, StyleSheet } from 'react-native';
+import { BlurView } from 'expo-blur';
 
 interface Props {
     imageUri: string;
@@ -14,13 +15,15 @@ export default function LinePreview({ imageUri, displayName, username }: Props) 
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>プロフィール</Text>
                 <View style={styles.profileCard}>
-                    <ImageBackground
-                        source={{ uri: imageUri }}
-                        style={styles.profileBanner}
-                        blurRadius={20}
-                    >
+                    <View style={styles.profileBanner}>
+                        <Image
+                            key={imageUri}
+                            source={{ uri: imageUri }}
+                            style={styles.bannerImage}
+                        />
+                        <BlurView intensity={30} tint="light" style={styles.bannerBlur} />
                         <View style={styles.bannerOverlay} />
-                    </ImageBackground>
+                    </View>
                     <View style={styles.profileHeader}>
                         <View style={styles.lineAvatarContainer}>
                             <Image source={{ uri: imageUri }} style={styles.profileAvatar} />
@@ -310,6 +313,16 @@ const styles = StyleSheet.create({
     profileBanner: {
         height: 120,
         backgroundColor: '#a0a0a0',
+        overflow: 'hidden',
+    },
+    bannerImage: {
+        ...StyleSheet.absoluteFillObject,
+        width: '100%',
+        height: '100%',
+        resizeMode: 'cover',
+    },
+    bannerBlur: {
+        ...StyleSheet.absoluteFillObject,
     },
     bannerOverlay: {
         ...StyleSheet.absoluteFillObject,
