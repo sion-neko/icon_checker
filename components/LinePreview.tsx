@@ -14,9 +14,13 @@ export default function LinePreview({ imageUri, displayName, username }: Props) 
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>プロフィール</Text>
                 <View style={styles.profileCard}>
-                    <View style={styles.profileBanner}>
+                    <ImageBackground
+                        source={{ uri: imageUri }}
+                        style={styles.profileBanner}
+                        blurRadius={20}
+                    >
                         <View style={styles.bannerOverlay} />
-                    </View>
+                    </ImageBackground>
                     <View style={styles.profileHeader}>
                         <View style={styles.lineAvatarContainer}>
                             <Image source={{ uri: imageUri }} style={styles.profileAvatar} />

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Image, Text, StyleSheet } from 'react-native';
+import { View, Image, Text, StyleSheet, ImageBackground } from 'react-native';
 import { Feather, FontAwesome6 } from '@expo/vector-icons';
 
 interface Props {
@@ -17,7 +17,13 @@ export default function XPreview({ imageUri, displayName, username }: Props) {
 
                 {/* ヘッダー画像 */}
                 <View style={styles.profileHeader}>
-                    <View style={styles.coverPhoto} />
+                    <ImageBackground
+                        source={{ uri: imageUri }}
+                        style={styles.coverPhoto}
+                        blurRadius={20}
+                    >
+                        <View style={styles.coverOverlay} />
+                    </ImageBackground>
                     <View style={styles.avatarContainer}>
                         <Image source={{ uri: imageUri }} style={styles.profileAvatar} />
                     </View>
@@ -225,6 +231,10 @@ const styles = StyleSheet.create({
         width: '100%',
         height: 100,
         backgroundColor: '#cfd9de',
+    },
+    coverOverlay: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'rgba(0,0,0,0.1)',
     },
     avatarContainer: {
         position: 'absolute',
