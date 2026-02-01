@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View, ScrollView, TextInput, Text, Image, TouchableOpacity, FlatList, Dimensions } from 'react-native';
+import { StyleSheet, View, ScrollView, TextInput, Text, Image, TouchableOpacity, FlatList, Dimensions, KeyboardAvoidingView, Platform } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Feather } from '@expo/vector-icons';
 import { useState, useRef, useEffect } from 'react';
@@ -271,46 +271,54 @@ export default function App() {
     <View style={styles.container}>
       {/* 画像がない場合は空状態UI */}
       {images.length === 0 && (
-        <ScrollView
-          style={styles.noImageContainer}
-          contentContainerStyle={styles.noImageContent}
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? -220 : 0}
         >
-          <View style={styles.header}>
-            <Text style={styles.headerTitle}>Icon Checker</Text>
-          </View>
-          {renderEmptyState()}
+          <ScrollView
+            style={styles.noImageContainer}
+            contentContainerStyle={styles.noImageContent}
+            keyboardShouldPersistTaps="handled"
+            automaticallyAdjustKeyboardInsets={true}
+          >
+            <View style={styles.header}>
+              <Text style={styles.headerTitle}>Icon Checker</Text>
+            </View>
+            {renderEmptyState()}
 
-          {/* ユーザー情報入力（折りたたみ風） */}
-          <View style={styles.userInfoSection}>
-            <Text style={styles.userInfoSectionTitle}>プロフィール設定</Text>
-            <View style={styles.inputContainer}>
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>表示名</Text>
-                <TextInput
-                  style={styles.input}
-                  value={displayName}
-                  onChangeText={setDisplayName}
-                  placeholder="あなたの名前を表示"
-                  placeholderTextColor="#999"
-                />
-              </View>
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>ユーザーID</Text>
-                <View style={styles.usernameInput}>
-                  <Text style={styles.atSymbol}>@</Text>
+            {/* ユーザー情報入力（折りたたみ風） */}
+            <View style={styles.userInfoSection}>
+              <Text style={styles.userInfoSectionTitle}>プロフィール設定</Text>
+              <View style={styles.inputContainer}>
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>表示名</Text>
                   <TextInput
-                    style={[styles.input, styles.usernameField]}
-                    value={username}
-                    onChangeText={setUsername}
-                    placeholder="username"
+                    style={styles.input}
+                    value={displayName}
+                    onChangeText={setDisplayName}
+                    placeholder="あなたの名前を表示"
                     placeholderTextColor="#999"
-                    autoCapitalize="none"
                   />
+                </View>
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>ユーザーID</Text>
+                  <View style={styles.usernameInput}>
+                    <Text style={styles.atSymbol}>@</Text>
+                    <TextInput
+                      style={[styles.input, styles.usernameField]}
+                      value={username}
+                      onChangeText={setUsername}
+                      placeholder="username"
+                      placeholderTextColor="#999"
+                      autoCapitalize="none"
+                    />
+                  </View>
                 </View>
               </View>
             </View>
-          </View>
-        </ScrollView>
+          </ScrollView>
+        </KeyboardAvoidingView>
       )}
 
       {/* 画像がある場合はタブ + プレビュー */}
