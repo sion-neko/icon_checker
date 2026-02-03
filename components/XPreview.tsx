@@ -102,6 +102,92 @@ export default function XPreview({ imageUri, displayName, username }: Props) {
                 </View>
             </View>
 
+            {/* タイムライン投稿 2 */}
+            <View style={styles.tweet}>
+                <Image source={{ uri: imageUri }} style={styles.avatar} />
+
+                <View style={styles.content}>
+                    <View style={styles.header}>
+                        <Text style={styles.displayName}>{displayName}</Text>
+                        <Text style={styles.username}>@{username}</Text>
+                        <Text style={styles.dot}>·</Text>
+                        <Text style={styles.time}>4h</Text>
+                        <View style={styles.spacer} />
+                        <Feather name="more-horizontal" size={18} color="#536471" />
+                    </View>
+
+                    <Text style={styles.tweetText}>
+                        今日も天気がいいね～ ☀️{'\n'}
+                        散歩してきた
+                    </Text>
+
+                    <View style={styles.actions}>
+                        <View style={styles.action}>
+                            <Feather name="message-circle" size={18} color="#536471" />
+                            <Text style={styles.actionCount}>5</Text>
+                        </View>
+                        <View style={styles.action}>
+                            <FontAwesome6 name="retweet" size={16} color="#536471" />
+                            <Text style={styles.actionCount}>12</Text>
+                        </View>
+                        <View style={styles.action}>
+                            <Feather name="heart" size={18} color="#536471" />
+                            <Text style={styles.actionCount}>67</Text>
+                        </View>
+                        <View style={styles.action}>
+                            <Feather name="bar-chart-2" size={18} color="#536471" />
+                            <Text style={styles.actionCount}>420</Text>
+                        </View>
+                        <View style={styles.action}>
+                            <Feather name="bookmark" size={18} color="#536471" />
+                        </View>
+                    </View>
+                </View>
+            </View>
+
+            {/* タイムライン投稿 3 */}
+            <View style={styles.tweet}>
+                <Image source={{ uri: imageUri }} style={styles.avatar} />
+
+                <View style={styles.content}>
+                    <View style={styles.header}>
+                        <Text style={styles.displayName}>{displayName}</Text>
+                        <Text style={styles.username}>@{username}</Text>
+                        <Text style={styles.dot}>·</Text>
+                        <Text style={styles.time}>1d</Text>
+                        <View style={styles.spacer} />
+                        <Feather name="more-horizontal" size={18} color="#536471" />
+                    </View>
+
+                    <Text style={styles.tweetText}>
+                        やっと新しい場所を見つけた 🗺️{'\n'}
+                        明日も探索してみるかな
+                    </Text>
+
+                    <View style={styles.actions}>
+                        <View style={styles.action}>
+                            <Feather name="message-circle" size={18} color="#536471" />
+                            <Text style={styles.actionCount}>8</Text>
+                        </View>
+                        <View style={styles.action}>
+                            <FontAwesome6 name="retweet" size={16} color="#536471" />
+                            <Text style={styles.actionCount}>21</Text>
+                        </View>
+                        <View style={styles.action}>
+                            <Feather name="heart" size={18} color="#536471" />
+                            <Text style={styles.actionCount}>95</Text>
+                        </View>
+                        <View style={styles.action}>
+                            <Feather name="bar-chart-2" size={18} color="#536471" />
+                            <Text style={styles.actionCount}>870</Text>
+                        </View>
+                        <View style={styles.action}>
+                            <Feather name="bookmark" size={18} color="#536471" />
+                        </View>
+                    </View>
+                </View>
+            </View>
+
             {/* 通知プレビュー */}
             <View style={styles.notificationSection}>
                 <Text style={styles.sectionTitle}>通知</Text>
@@ -149,6 +235,15 @@ const styles = StyleSheet.create({
         height: 48,
         borderRadius: 24,
         marginRight: 12,
+    },
+    avatarPlaceholder: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    avatarPlaceholderText: {
+        color: '#fff',
+        fontSize: 18,
+        fontWeight: 'bold',
     },
     content: {
         flex: 1,

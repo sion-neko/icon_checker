@@ -55,19 +55,38 @@ export default function LinePreview({ imageUri, displayName, username }: Props) 
                         </View>
                     </View>
 
-                    {/* 友達2（比較用） */}
+                    {/* 友達2 */}
                     <View style={styles.chatItem}>
-                        <View style={styles.avatarPlaceholder}>
+                        <View style={[styles.avatarPlaceholder, { backgroundColor: '#d4a5e5' }]}>
                             <Text style={styles.avatarPlaceholderText}>友</Text>
                         </View>
                         <View style={styles.chatContent}>
                             <View style={styles.chatHeader}>
-                                <Text style={styles.chatName}>友達の名前</Text>
+                                <Text style={styles.chatName}>友達さん</Text>
                                 <Text style={styles.time}>昨日</Text>
                             </View>
                             <Text style={styles.lastMessage} numberOfLines={1}>
                                 了解した！またね。
                             </Text>
+                        </View>
+                    </View>
+
+                    {/* 友達3 */}
+                    <View style={styles.chatItem}>
+                        <View style={[styles.avatarPlaceholder, { backgroundColor: '#a5d4e5' }]}>
+                            <Text style={styles.avatarPlaceholderText}>友</Text>
+                        </View>
+                        <View style={styles.chatContent}>
+                            <View style={styles.chatHeader}>
+                                <Text style={styles.chatName}>友達2さん</Text>
+                                <Text style={styles.time}>2日前</Text>
+                            </View>
+                            <Text style={styles.lastMessage} numberOfLines={1}>
+                                今週末どうする？
+                            </Text>
+                        </View>
+                        <View style={styles.badge}>
+                            <Text style={styles.badgeText}>1</Text>
                         </View>
                     </View>
                 </View>
@@ -89,7 +108,7 @@ export default function LinePreview({ imageUri, displayName, username }: Props) 
                             <Text style={styles.messageSenderName}>{displayName}</Text>
                             <View style={styles.messageRow}>
                                 <View style={styles.messageBubbleOther}>
-                                    <Text style={styles.messageText}>アイコン変えた？いい感じ！</Text>
+                                    <Text style={styles.messageText}>アイコン変えた！</Text>
                                 </View>
                                 <Text style={styles.messageTime}>12:30</Text>
                             </View>
@@ -104,9 +123,50 @@ export default function LinePreview({ imageUri, displayName, username }: Props) 
                                 <Text style={styles.messageTimeMe}>12:34</Text>
                                 <View style={styles.messageBubbleMe}>
                                     <Text style={styles.messageTextMe}>
-                                        ありがとー！
+                                        いい感じ👍
                                     </Text>
                                 </View>
+                            </View>
+                        </View>
+                    </View>
+
+                    {/* 相手のメッセージ 2 */}
+                    <View style={styles.messageGroup}>
+                        <Image source={{ uri: imageUri }} style={styles.messageAvatar} />
+                        <View style={styles.messagesColumn}>
+                            <View style={styles.messageRow}>
+                                <View style={styles.messageBubbleOther}>
+                                    <Text style={styles.messageText}>ありがとう</Text>
+                                </View>
+                                <Text style={styles.messageTime}>12:35</Text>
+                            </View>
+                        </View>
+                    </View>
+
+                    {/* 自分のメッセージ 2 */}
+                    <View style={styles.messageGroupMe}>
+                        <View style={styles.messagesColumnMe}>
+                            <View style={styles.messageRowMe}>
+                                <Text style={styles.messageReadMe}>既読</Text>
+                                <Text style={styles.messageTimeMe}>12:36</Text>
+                                <View style={styles.messageBubbleMe}>
+                                    <Text style={styles.messageTextMe}>
+                                        いつ変えたの？
+                                    </Text>
+                                </View>
+                            </View>
+                        </View>
+                    </View>
+
+                    {/* 相手のメッセージ 3 */}
+                    <View style={styles.messageGroup}>
+                        <Image source={{ uri: imageUri }} style={styles.messageAvatar} />
+                        <View style={styles.messagesColumn}>
+                            <View style={styles.messageRow}>
+                                <View style={styles.messageBubbleOther}>
+                                    <Text style={styles.messageText}>今日だよ～</Text>
+                                </View>
+                                <Text style={styles.messageTime}>12:37</Text>
                             </View>
                         </View>
                     </View>

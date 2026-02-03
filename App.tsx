@@ -136,11 +136,10 @@ export default function App() {
   // 設定コンポーネント（再利用）
   const renderSettings = () => (
     <View style={styles.settingsContainer}>
-      <Text style={styles.settingsTitle}>プレビュー作成</Text>
+      <Text style={styles.settingsTitle}>アイコンを確認する</Text>
 
       {/* 画像リスト */}
       <View style={styles.imageListContainer}>
-        <Text style={styles.label}>選択中の画像</Text>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}

@@ -15,18 +15,54 @@ export default function InstagramPreview({ imageUri, displayName, username }: Pr
             {/* ストーリーズプレビュー */}
             <View style={styles.stories}>
                 <Text style={styles.sectionTitle}>ストーリーズ</Text>
-                <View style={styles.storyItem}>
-                    <LinearGradient
-                        colors={['#feda75', '#fa7e1e', '#d62976', '#962fbf', '#4f5bd5']}
-                        start={{ x: 0, y: 1 }}
-                        end={{ x: 1, y: 0 }}
-                        style={styles.storyRing}
-                    >
-                        <View style={styles.storyInnerRing}>
-                            <Image source={{ uri: imageUri }} style={styles.storyAvatar} />
-                        </View>
-                    </LinearGradient>
-                    <Text style={styles.storyName}>{displayName}</Text>
+                <View style={styles.storiesRow}>
+                    {/* 自分のストーリーズ */}
+                    <View style={styles.storyItem}>
+                        <LinearGradient
+                            colors={['#feda75', '#fa7e1e', '#d62976', '#962fbf', '#4f5bd5']}
+                            start={{ x: 0, y: 1 }}
+                            end={{ x: 1, y: 0 }}
+                            style={styles.storyRing}
+                        >
+                            <View style={styles.storyInnerRing}>
+                                <Image source={{ uri: imageUri }} style={styles.storyAvatar} />
+                            </View>
+                        </LinearGradient>
+                        <Text style={styles.storyName}>{displayName}</Text>
+                    </View>
+
+                    {/* 友達のストーリーズ */}
+                    <View style={styles.storyItem}>
+                        <LinearGradient
+                            colors={['#feda75', '#fa7e1e', '#d62976', '#962fbf', '#4f5bd5']}
+                            start={{ x: 0, y: 1 }}
+                            end={{ x: 1, y: 0 }}
+                            style={styles.storyRing}
+                        >
+                            <View style={styles.storyInnerRing}>
+                                <View style={[styles.storyAvatar, styles.storyPlaceholder, { backgroundColor: '#d4a5e5' }]}>
+                                    <Text style={styles.storyPlaceholderText}>友</Text>
+                                </View>
+                            </View>
+                        </LinearGradient>
+                        <Text style={styles.storyName}>友達</Text>
+                    </View>
+
+                    <View style={styles.storyItem}>
+                        <LinearGradient
+                            colors={['#feda75', '#fa7e1e', '#d62976', '#962fbf', '#4f5bd5']}
+                            start={{ x: 0, y: 1 }}
+                            end={{ x: 1, y: 0 }}
+                            style={styles.storyRing}
+                        >
+                            <View style={styles.storyInnerRing}>
+                                <View style={[styles.storyAvatar, styles.storyPlaceholder, { backgroundColor: '#a5d4e5' }]}>
+                                    <Text style={styles.storyPlaceholderText}>友</Text>
+                                </View>
+                            </View>
+                        </LinearGradient>
+                        <Text style={styles.storyName}>友達2</Text>
+                    </View>
                 </View>
             </View>
 
@@ -74,6 +110,86 @@ export default function InstagramPreview({ imageUri, displayName, username }: Pr
                 {/* コメント */}
                 <Text style={styles.viewComments}>View all 42 comments</Text>
                 <Text style={styles.timestamp}>2 HOURS AGO</Text>
+            </View>
+
+            {/* 2番目の投稿 */}
+            <View style={styles.post}>
+                <View style={styles.header}>
+                    <Image source={{ uri: imageUri }} style={styles.avatar} />
+                    <View style={styles.headerText}>
+                        <Text style={styles.username}>{username}</Text>
+                        <Text style={styles.location}>Osaka, Japan</Text>
+                    </View>
+                    <Feather name="more-horizontal" size={24} color="black" />
+                </View>
+
+                <Image
+                    source={{ uri: 'https://picsum.photos/seed/post2/400/400' }}
+                    style={styles.postImage}
+                />
+
+                <View style={styles.actions}>
+                    <View style={styles.leftActions}>
+                        <Ionicons name="heart-outline" size={28} color="black" style={styles.actionIcon} />
+                        <Ionicons name="chatbubble-outline" size={26} color="black" style={styles.actionIcon} />
+                        <Ionicons name="paper-plane-outline" size={26} color="black" style={styles.actionIcon} />
+                    </View>
+                    <Ionicons name="bookmark-outline" size={26} color="black" />
+                </View>
+
+                <Text style={styles.likes}>891 likes</Text>
+
+                <View style={styles.caption}>
+                    <Text>
+                        <Text style={styles.username}>{username} </Text>
+                        <Text style={styles.captionText}>
+                            週末のお菓子タイム 🍰☕ #weekend #snack
+                        </Text>
+                    </Text>
+                </View>
+
+                <Text style={styles.viewComments}>View all 18 comments</Text>
+                <Text style={styles.timestamp}>5 HOURS AGO</Text>
+            </View>
+
+            {/* 3番目の投稿 */}
+            <View style={styles.post}>
+                <View style={styles.header}>
+                    <Image source={{ uri: imageUri }} style={styles.avatar} />
+                    <View style={styles.headerText}>
+                        <Text style={styles.username}>{username}</Text>
+                        <Text style={styles.location}>Shibuya, Tokyo</Text>
+                    </View>
+                    <Feather name="more-horizontal" size={24} color="black" />
+                </View>
+
+                <Image
+                    source={{ uri: 'https://picsum.photos/seed/post3/400/400' }}
+                    style={styles.postImage}
+                />
+
+                <View style={styles.actions}>
+                    <View style={styles.leftActions}>
+                        <Ionicons name="heart-outline" size={28} color="black" style={styles.actionIcon} />
+                        <Ionicons name="chatbubble-outline" size={26} color="black" style={styles.actionIcon} />
+                        <Ionicons name="paper-plane-outline" size={26} color="black" style={styles.actionIcon} />
+                    </View>
+                    <Ionicons name="bookmark-outline" size={26} color="black" />
+                </View>
+
+                <Text style={styles.likes}>2,105 likes</Text>
+
+                <View style={styles.caption}>
+                    <Text>
+                        <Text style={styles.username}>{username} </Text>
+                        <Text style={styles.captionText}>
+                            新しい場所を発見した 📍 #explore #tokyo
+                        </Text>
+                    </Text>
+                </View>
+
+                <Text style={styles.viewComments}>View all 56 comments</Text>
+                <Text style={styles.timestamp}>1 DAY AGO</Text>
             </View>
         </View>
     );
@@ -179,6 +295,10 @@ const styles = StyleSheet.create({
         marginBottom: 12,
         textTransform: 'uppercase',
     },
+    storiesRow: {
+        flexDirection: 'row',
+        gap: 12,
+    },
     storyItem: {
         alignItems: 'center',
         width: 80,
@@ -201,6 +321,24 @@ const styles = StyleSheet.create({
         height: 60,
         borderRadius: 30,
         borderWidth: 0,
+    },
+    avatarPlaceholder: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    avatarPlaceholderText: {
+        color: '#fff',
+        fontSize: 12,
+        fontWeight: 'bold',
+    },
+    storyPlaceholder: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    storyPlaceholderText: {
+        color: '#fff',
+        fontSize: 18,
+        fontWeight: 'bold',
     },
     storyName: {
         fontSize: 12,
