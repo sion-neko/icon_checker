@@ -47,7 +47,7 @@ export default function LinePreview({ imageUri, displayName, username }: Props) 
                                 <Text style={styles.time}>12:34</Text>
                             </View>
                             <Text style={styles.lastMessage} numberOfLines={1}>
-                                最新のメッセージがここに表示されます
+                                楽しみ！
                             </Text>
                         </View>
                         <View style={styles.badge}>
@@ -108,7 +108,7 @@ export default function LinePreview({ imageUri, displayName, username }: Props) 
                             <Text style={styles.messageSenderName}>{displayName}</Text>
                             <View style={styles.messageRow}>
                                 <View style={styles.messageBubbleOther}>
-                                    <Text style={styles.messageText}>アイコン変えた！</Text>
+                                    <Text style={styles.messageText}>今週末ひま？</Text>
                                 </View>
                                 <Text style={styles.messageTime}>12:30</Text>
                             </View>
@@ -123,7 +123,7 @@ export default function LinePreview({ imageUri, displayName, username }: Props) 
                                 <Text style={styles.messageTimeMe}>12:34</Text>
                                 <View style={styles.messageBubbleMe}>
                                     <Text style={styles.messageTextMe}>
-                                        いい感じ👍
+                                        土曜なら空いてるよ！
                                     </Text>
                                 </View>
                             </View>
@@ -136,7 +136,7 @@ export default function LinePreview({ imageUri, displayName, username }: Props) 
                         <View style={styles.messagesColumn}>
                             <View style={styles.messageRow}>
                                 <View style={styles.messageBubbleOther}>
-                                    <Text style={styles.messageText}>ありがとう</Text>
+                                    <Text style={styles.messageText}>じゃあご飯いこ～</Text>
                                 </View>
                                 <Text style={styles.messageTime}>12:35</Text>
                             </View>
@@ -151,7 +151,7 @@ export default function LinePreview({ imageUri, displayName, username }: Props) 
                                 <Text style={styles.messageTimeMe}>12:36</Text>
                                 <View style={styles.messageBubbleMe}>
                                     <Text style={styles.messageTextMe}>
-                                        いつ変えたの？
+                                        いいね👍
                                     </Text>
                                 </View>
                             </View>
@@ -164,7 +164,7 @@ export default function LinePreview({ imageUri, displayName, username }: Props) 
                         <View style={styles.messagesColumn}>
                             <View style={styles.messageRow}>
                                 <View style={styles.messageBubbleOther}>
-                                    <Text style={styles.messageText}>今日だよ～</Text>
+                                    <Text style={styles.messageText}>楽しみ！</Text>
                                 </View>
                                 <Text style={styles.messageTime}>12:37</Text>
                             </View>
