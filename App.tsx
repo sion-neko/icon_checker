@@ -30,6 +30,7 @@ export default function App() {
 
   const [displayName, setDisplayName] = useState('あなたの名前');
   const [username, setUsername] = useState('your_username');
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
 
   const tabFlatListRef = useRef<FlatList>(null);
   const scrollX = useRef(new RNAnimated.Value(0)).current;
@@ -49,6 +50,9 @@ export default function App() {
         }
       } catch (error) {
         console.error('Failed to load user data:', error);
+      } finally {
+        // 読み込み完了後にフラグを立てる（エラー時も含む）
+        setIsDataLoaded(true);
       }
     };
 
@@ -88,8 +92,10 @@ export default function App() {
     tabFlatListRef.current?.scrollToIndex({ index, animated: true });
   };
 
-  // displayNameが変更されたら自動保存
+  // displayNameが変更されたら自動保存（読み込み完了後のみ）
   useEffect(() => {
+    if (!isDataLoaded) return; // 読み込み完了前は保存しない
+
     const saveDisplayName = async () => {
       try {
         await AsyncStorage.setItem('displayName', displayName);
@@ -99,10 +105,12 @@ export default function App() {
     };
 
     saveDisplayName();
-  }, [displayName]);
+  }, [displayName, isDataLoaded]);
 
-  // usernameが変更されたら自動保存
+  // usernameが変更されたら自動保存（読み込み完了後のみ）
   useEffect(() => {
+    if (!isDataLoaded) return; // 読み込み完了前は保存しない
+
     const saveUsername = async () => {
       try {
         await AsyncStorage.setItem('username', username);
@@ -112,7 +120,7 @@ export default function App() {
     };
 
     saveUsername();
-  }, [username]);
+  }, [username, isDataLoaded]);
 
   const renderPreviewItemByTab = (imageUri: string, tabIndex: number) => {
     const props = {
