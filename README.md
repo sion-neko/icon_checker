@@ -4,11 +4,11 @@ SNSアイコンのプレビューを確認できるReact Nativeアプリケー�
 
 ## 機能
 
-- 複数の画像を選択してプレビュー
+- 画像を選択してプレビュー（複数枚対応）
 - Instagram、X、LINEのアイコン表示をシミュレート
 - 表示名とユーザーIDのカスタマイズ
-- スワイプで画像を切り替え
-- 設定パネルの開閉機能
+- スワイプでSNSタブを切り替え
+- 表示名・ユーザーIDの自動保存（AsyncStorage）
 
 ## セットアップ手順
 
@@ -81,20 +81,18 @@ npm run web
 ## 使い方
 
 1. **画像を追加**
-   - 「📷 1枚追加」ボタン: 1枚の画像を編集して追加
-   - 「📷 複数追加」ボタン: 複数の画像をまとめて追加
+   - 初回起動時は「画像を選択」ボタンをタップ
+   - 画像追加後は「+」ボタンで追加の画像を選択可能
 
 2. **プレビューを確認**
-   - タブを切り替えてInstagram、X、LINEでの表示を確認
-   - スワイプで別の画像に切り替え
-   - サムネイルをタップして画像を選択
+   - タブまたはスワイプでInstagram、X、LINEの表示を切り替え
+   - サムネイルをタップして確認する画像を選択
+   - 画像の×ボタンで不要な画像を削除
 
 3. **表示名とユーザーIDを変更**
    - 設定パネルで表示名とユーザーIDを入力
    - プレビューにリアルタイムで反映
-
-4. **設定パネルの開閉**
-   - 「設定を閉じる/開く」ボタンでパネルを折りたたみ可能
+   - 入力内容は自動保存され、次回起動時に復元
 
 ## プロジェクト構成
 
@@ -118,6 +116,8 @@ icon-checker/
 - **UI**: React Native
 - **言語**: TypeScript
 - **画像選択**: expo-image-picker
+- **データ保存**: @react-native-async-storage/async-storage
+- **フォント**: @expo-google-fonts/inter
 
 ## トラブルシューティング
 
@@ -137,7 +137,12 @@ npx expo start -c
 ### node_modulesを再インストール
 
 ```bash
+# macOS/Linux
 rm -rf node_modules package-lock.json
+npm install
+
+# Windows (PowerShell)
+Remove-Item -Recurse -Force node_modules, package-lock.json
 npm install
 ```
 
