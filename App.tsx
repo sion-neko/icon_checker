@@ -27,6 +27,9 @@ export default function App() {
   const [images, setImages] = useState<string[]>([]);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
   const [activeTab, setActiveTab] = useState(0);
+  // 各タブのプレビューの実際の高さ（横並びの行が一番高いページに揃うのを防ぐため）
+  const [pageHeights, setPageHeights] = useState<number[]>([]);
+  const [isSwiping, setIsSwiping] = useState(false);
 
   const [displayName, setDisplayName] = useState('あなたの名前');
   const [username, setUsername] = useState('your_username');
@@ -140,6 +143,20 @@ export default function App() {
         return null;
     }
   };
+
+  const handlePageLayout = (tabIndex: number, height: number) => {
+    setPageHeights((prev) => {
+      if (prev[tabIndex] === height) return prev;
+      const next = [...prev];
+      next[tabIndex] = height;
+      return next;
+    });
+  };
+
+  // スワイプ中は一番高いページに合わせ、止まったら表示中タブの高さにする
+  const previewHeight = isSwiping
+    ? Math.max(0, ...pageHeights.filter(Boolean))
+    : pageHeights[activeTab];
 
   // 設定コンポーネント（再利用）
   const renderSettings = () => (
@@ -358,19 +375,25 @@ export default function App() {
               pagingEnabled
               showsHorizontalScrollIndicator={false}
               keyExtractor={(item) => item}
+              style={previewHeight ? { height: previewHeight } : undefined}
               scrollEventThrottle={16}
               onScroll={RNAnimated.event(
                 [{ nativeEvent: { contentOffset: { x: scrollX } } }],
                 { useNativeDriver: true }
               )}
+              onScrollBeginDrag={() => setIsSwiping(true)}
               onMomentumScrollEnd={(event) => {
                 const index = Math.round(
                   event.nativeEvent.contentOffset.x / SCREEN_WIDTH
                 );
                 setActiveTab(index);
+                setIsSwiping(false);
               }}
               renderItem={({ index: tabIndex }) => (
-                <View style={styles.previewPage}>
+                <View
+                  style={styles.previewPage}
+                  onLayout={(e) => handlePageLayout(tabIndex, e.nativeEvent.layout.height)}
+                >
                   <View style={styles.previewWrapper}>
                     {renderPreviewItemByTab(images[selectedImageIndex], tabIndex)}
                   </View>
