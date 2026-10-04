@@ -1,7 +1,8 @@
-import React from 'react';
-import { View, Image, Text, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Image, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Feather, FontAwesome6 } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
+import IconViewer from './IconViewer';
 
 interface Props {
     imageUri: string;
@@ -10,8 +11,17 @@ interface Props {
 }
 
 export default function XPreview({ imageUri, displayName, username }: Props) {
+    const [isViewerVisible, setIsViewerVisible] = useState(false);
+
     return (
         <View style={styles.container}>
+            <IconViewer
+                visible={isViewerVisible}
+                imageUri={imageUri}
+                shape="circle"
+                onClose={() => setIsViewerVisible(false)}
+            />
+
             {/* プロフィール画面風 */}
             <View style={styles.profile}>
                 <Text style={styles.sectionTitle}>プロフィール画面</Text>
@@ -27,9 +37,13 @@ export default function XPreview({ imageUri, displayName, username }: Props) {
                         <BlurView intensity={30} tint="light" style={styles.coverBlur} />
                         <View style={styles.coverOverlay} />
                     </View>
-                    <View style={styles.avatarContainer}>
+                    <TouchableOpacity
+                        style={styles.avatarContainer}
+                        onPress={() => setIsViewerVisible(true)}
+                        activeOpacity={0.8}
+                    >
                         <Image source={{ uri: imageUri }} style={styles.profileAvatar} />
-                    </View>
+                    </TouchableOpacity>
                     <View style={styles.editButtonContainer}>
                         <View style={styles.editButton}>
                             <Text style={styles.editButtonText}>編集</Text>

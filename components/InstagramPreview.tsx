@@ -1,7 +1,8 @@
-import React from 'react';
-import { View, Image, Text, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Image, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons, Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import IconViewer from './IconViewer';
 
 interface Props {
     imageUri: string;
@@ -10,14 +11,27 @@ interface Props {
 }
 
 export default function InstagramPreview({ imageUri, displayName, username }: Props) {
+    const [isViewerVisible, setIsViewerVisible] = useState(false);
+
     return (
         <View style={styles.container}>
+            <IconViewer
+                visible={isViewerVisible}
+                imageUri={imageUri}
+                shape="circle"
+                onClose={() => setIsViewerVisible(false)}
+            />
+
             {/* ストーリーズプレビュー */}
             <View style={styles.stories}>
                 <Text style={styles.sectionTitle}>ストーリーズ</Text>
                 <View style={styles.storiesRow}>
-                    {/* 自分のストーリーズ */}
-                    <View style={styles.storyItem}>
+                    {/* 自分のストーリーズ（タップでアイコンを拡大表示） */}
+                    <TouchableOpacity
+                        style={styles.storyItem}
+                        onPress={() => setIsViewerVisible(true)}
+                        activeOpacity={0.8}
+                    >
                         <LinearGradient
                             colors={['#feda75', '#fa7e1e', '#d62976', '#962fbf', '#4f5bd5']}
                             start={{ x: 0, y: 1 }}
@@ -29,7 +43,7 @@ export default function InstagramPreview({ imageUri, displayName, username }: Pr
                             </View>
                         </LinearGradient>
                         <Text style={styles.storyName}>{displayName}</Text>
-                    </View>
+                    </TouchableOpacity>
 
                     {/* 友達のストーリーズ */}
                     <View style={styles.storyItem}>
