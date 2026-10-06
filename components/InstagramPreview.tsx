@@ -81,7 +81,7 @@ export default function InstagramPreview({ imageUri, displayName, username }: Pr
 
                 {/* 投稿画像 */}
                 <Image
-                    source={{ uri: 'https://picsum.photos/400/400' }}
+                    source={require('../assets/sample-post-1.jpg')}
                     style={styles.postImage}
                 />
 
@@ -125,7 +125,7 @@ export default function InstagramPreview({ imageUri, displayName, username }: Pr
                 </View>
 
                 <Image
-                    source={{ uri: 'https://picsum.photos/seed/post2/400/400' }}
+                    source={require('../assets/sample-post-2.jpg')}
                     style={styles.postImage}
                 />
 
@@ -165,7 +165,7 @@ export default function InstagramPreview({ imageUri, displayName, username }: Pr
                 </View>
 
                 <Image
-                    source={{ uri: 'https://picsum.photos/seed/post3/400/400' }}
+                    source={require('../assets/sample-post-3.jpg')}
                     style={styles.postImage}
                 />
 
@@ -184,7 +184,7 @@ export default function InstagramPreview({ imageUri, displayName, username }: Pr
                     <Text>
                         <Text style={styles.username}>{username} </Text>
                         <Text style={styles.captionText}>
-                            新しい場所を発見した 📍 #explore #tokyo
+                            新しい場所を発見した 📍 #explore #travel
                         </Text>
                     </Text>
                 </View>
