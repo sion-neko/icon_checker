@@ -383,11 +383,12 @@ export default function App() {
                 setIsSwiping(false);
               }}
               renderItem={({ index: tabIndex }) => (
-                <View
-                  style={styles.previewPage}
-                  onLayout={(e) => handlePageLayout(tabIndex, e.nativeEvent.layout.height)}
-                >
-                  <View style={styles.previewWrapper}>
+                <View style={styles.previewPage}>
+                  {/* ページ自体は行の高さ(一番高いページ)に引き伸ばされるので、中身側で測る */}
+                  <View
+                    style={styles.previewWrapper}
+                    onLayout={(e) => handlePageLayout(tabIndex, e.nativeEvent.layout.height)}
+                  >
                     {renderPreviewItemByTab(images[selectedImageIndex], tabIndex)}
                   </View>
                 </View>
