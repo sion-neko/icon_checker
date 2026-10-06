@@ -3,9 +3,10 @@ import { View, Image, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Feather, FontAwesome6 } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import IconViewer from './IconViewer';
+import Avatar from './Avatar';
 
 interface Props {
-    imageUri: string;
+    imageUri: string | null;
     displayName: string;
     username: string;
 }
@@ -15,12 +16,14 @@ export default function XPreview({ imageUri, displayName, username }: Props) {
 
     return (
         <View style={styles.container}>
-            <IconViewer
-                visible={isViewerVisible}
-                imageUri={imageUri}
-                shape="circle"
-                onClose={() => setIsViewerVisible(false)}
-            />
+            {imageUri && (
+                <IconViewer
+                    visible={isViewerVisible}
+                    imageUri={imageUri}
+                    shape="circle"
+                    onClose={() => setIsViewerVisible(false)}
+                />
+            )}
 
             {/* プロフィール画面風 */}
             <View style={styles.profile}>
@@ -29,20 +32,21 @@ export default function XPreview({ imageUri, displayName, username }: Props) {
                 {/* ヘッダー画像 */}
                 <View style={styles.profileHeader}>
                     <View style={styles.coverPhoto}>
-                        <Image
-                            key={imageUri}
-                            source={{ uri: imageUri }}
-                            style={styles.coverImage}
-                        />
-                        <BlurView intensity={30} tint="light" style={styles.coverBlur} />
+                        {imageUri && (
+                            <>
+                                <Image key={imageUri} source={{ uri: imageUri }} style={styles.coverImage} />
+                                <BlurView intensity={30} tint="light" style={styles.coverBlur} />
+                            </>
+                        )}
                         <View style={styles.coverOverlay} />
                     </View>
                     <TouchableOpacity
                         style={styles.avatarContainer}
                         onPress={() => setIsViewerVisible(true)}
+                        disabled={!imageUri}
                         activeOpacity={0.8}
                     >
-                        <Image source={{ uri: imageUri }} style={styles.profileAvatar} />
+                        <Avatar uri={imageUri} style={styles.profileAvatar} />
                     </TouchableOpacity>
                     <View style={styles.editButtonContainer}>
                         <View style={styles.editButton}>
@@ -72,7 +76,7 @@ export default function XPreview({ imageUri, displayName, username }: Props) {
 
             {/* タイムライン投稿 1 */}
             <View style={styles.tweet}>
-                <Image source={{ uri: imageUri }} style={styles.avatar} />
+                <Avatar uri={imageUri} style={styles.avatar} />
 
                 <View style={styles.content}>
                     {/* ヘッダー */}
@@ -118,7 +122,7 @@ export default function XPreview({ imageUri, displayName, username }: Props) {
 
             {/* タイムライン投稿 2 */}
             <View style={styles.tweet}>
-                <Image source={{ uri: imageUri }} style={styles.avatar} />
+                <Avatar uri={imageUri} style={styles.avatar} />
 
                 <View style={styles.content}>
                     <View style={styles.header}>
@@ -161,7 +165,7 @@ export default function XPreview({ imageUri, displayName, username }: Props) {
 
             {/* タイムライン投稿 3 */}
             <View style={styles.tweet}>
-                <Image source={{ uri: imageUri }} style={styles.avatar} />
+                <Avatar uri={imageUri} style={styles.avatar} />
 
                 <View style={styles.content}>
                     <View style={styles.header}>
@@ -209,7 +213,7 @@ export default function XPreview({ imageUri, displayName, username }: Props) {
                 <View style={styles.notification}>
                     <FontAwesome6 name="heart" size={24} color="#f91880" style={styles.notificationIcon} solid />
                     <View style={styles.notificationContent}>
-                        <Image source={{ uri: imageUri }} style={styles.notificationAvatar} />
+                        <Avatar uri={imageUri} style={styles.notificationAvatar} />
                         <Text style={styles.notificationText}>
                             <Text style={[styles.notificationBold, styles.username]}>@{username}</Text>さんがあなたの投稿をいいねしました
                         </Text>
@@ -219,7 +223,7 @@ export default function XPreview({ imageUri, displayName, username }: Props) {
                 <View style={styles.notification}>
                     <FontAwesome6 name="user-plus" size={18} color="#1d9bf0" style={styles.notificationIcon} />
                     <View style={styles.notificationContent}>
-                        <Image source={{ uri: imageUri }} style={styles.notificationAvatar} />
+                        <Avatar uri={imageUri} style={styles.notificationAvatar} />
                         <Text style={styles.notificationText}>
                             <Text style={[styles.notificationBold, styles.username]}>@{username}</Text>さんにフォローされました
                         </Text>

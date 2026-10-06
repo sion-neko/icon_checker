@@ -1,10 +1,11 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View, ScrollView, TextInput, Text, TouchableOpacity, FlatList, Dimensions, KeyboardAvoidingView, Platform, Modal } from 'react-native';
+import { StyleSheet, View, ScrollView, TextInput, Text, TouchableOpacity, FlatList, Dimensions, Modal } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Feather } from '@expo/vector-icons';
 import { useState, useRef, useEffect } from 'react';
 import { Animated as RNAnimated } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Directory, File, Paths } from 'expo-file-system';
 import InstagramPreview from './components/InstagramPreview';
 import XPreview from './components/XPreview';
 import LinePreview from './components/LinePreview';
@@ -17,6 +18,33 @@ import { ActivityIndicator } from 'react-native';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const TABS = ['Instagram', 'X', 'LINE'];
+
+// 選んだ画像の保存先。ImagePickerの返すファイルはキャッシュでOSに消されうるので、ここにコピーして残す
+const ICON_DIR = new Directory(Paths.document, 'icons');
+
+// アプリ更新でドキュメントディレクトリの絶対パスが変わることがあるため、保存するのはファイル名だけ
+const saveImageNames = async (uris: string[]) => {
+  const names = uris.map((uri) => new File(uri).name);
+  await AsyncStorage.setItem('imageNames', JSON.stringify(names));
+};
+
+const loadImageUris = async (): Promise<string[]> => {
+  const saved = await AsyncStorage.getItem('imageNames');
+  if (saved === null) return [];
+  const names: string[] = JSON.parse(saved);
+  return names
+    .map((name) => new File(ICON_DIR, name))
+    .filter((file) => file.exists)
+    .map((file) => file.uri);
+};
+
+const copyToIconDir = async (uri: string): Promise<string> => {
+  ICON_DIR.create({ idempotent: true, intermediates: true });
+  const source = new File(uri);
+  const destination = new File(ICON_DIR, `${Date.now()}${source.extension}`);
+  await source.copy(destination);
+  return destination.uri;
+};
 
 export default function App() {
   let [fontsLoaded] = useFonts({
@@ -47,12 +75,20 @@ export default function App() {
       try {
         const savedDisplayName = await AsyncStorage.getItem('displayName');
         const savedUsername = await AsyncStorage.getItem('username');
+        const savedImages = await loadImageUris();
+        const savedSelectedIndex = await AsyncStorage.getItem('selectedImageIndex');
 
         if (savedDisplayName !== null) {
           setDisplayName(savedDisplayName);
         }
         if (savedUsername !== null) {
           setUsername(savedUsername);
+        }
+        setImages(savedImages);
+        if (savedSelectedIndex !== null) {
+          setSelectedImageIndex(
+            Math.min(Number(savedSelectedIndex), Math.max(0, savedImages.length - 1))
+          );
         }
       } catch (error) {
         console.error('Failed to load user data:', error);
@@ -75,12 +111,28 @@ export default function App() {
     });
 
     if (!result.canceled) {
-      setImages([...images, result.assets[0].uri]);
+      let uri = result.assets[0].uri;
+      try {
+        uri = await copyToIconDir(uri);
+      } catch (error) {
+        // 保存に失敗しても今回のプレビューはできるよう、元の画像のまま使う
+        console.error('Failed to save image:', error);
+      }
+      setImages([...images, uri]);
       setSelectedImageIndex(images.length);
     }
   };
 
   const removeImage = (index: number) => {
+    try {
+      const file = new File(images[index]);
+      if (file.uri.startsWith(ICON_DIR.uri) && file.exists) {
+        file.delete();
+      }
+    } catch (error) {
+      console.error('Failed to delete image:', error);
+    }
+
     const newImages = images.filter((_, i) => i !== index);
     setImages(newImages);
 
@@ -143,7 +195,20 @@ export default function App() {
     saveUsername();
   }, [username, isDataLoaded]);
 
-  const renderPreviewItemByTab = (imageUri: string, tabIndex: number) => {
+  // 画像リストと選択位置も保存し、次回起動時に前回の状態から始める
+  useEffect(() => {
+    if (!isDataLoaded) return;
+    saveImageNames(images).catch((error) => console.error('Failed to save images:', error));
+  }, [images, isDataLoaded]);
+
+  useEffect(() => {
+    if (!isDataLoaded) return;
+    AsyncStorage.setItem('selectedImageIndex', String(selectedImageIndex)).catch((error) =>
+      console.error('Failed to save selected image:', error)
+    );
+  }, [selectedImageIndex, isDataLoaded]);
+
+  const renderPreviewItemByTab = (imageUri: string | null, tabIndex: number) => {
     const props = {
       imageUri,
       displayName,
@@ -176,7 +241,7 @@ export default function App() {
     ? Math.max(0, ...pageHeights.filter(Boolean))
     : pageHeights[activeTab];
 
-  // 表示名・ユーザーIDの入力欄（空状態と名前編集シートで共用）
+  // 表示名・ユーザーIDの入力欄（名前編集シートの中身）
   const renderNameInputs = () => (
     <View style={styles.inputContainer}>
       <View style={styles.inputGroup}>
@@ -210,7 +275,7 @@ export default function App() {
   const renderSettings = () => (
     <View style={styles.settingsContainer}>
       <View style={styles.settingsHeader}>
-        <Text style={styles.settingsTitle}>アイコンを確認する</Text>
+        <Text style={styles.settingsTitle}>IconChecker</Text>
         <TouchableOpacity
           style={styles.nameChip}
           onPress={() => setIsNameEditorOpen(true)}
@@ -239,7 +304,8 @@ export default function App() {
     </View>
   );
 
-  if (!fontsLoaded) {
+  // 保存データの読み込み前に空の状態がチラつかないよう、読み込み完了まで待つ
+  if (!fontsLoaded || !isDataLoaded) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" />
@@ -247,151 +313,71 @@ export default function App() {
     );
   }
 
-  // 空状態のイラスト
-  const renderEmptyState = () => (
-    <View style={styles.emptyStateContainer}>
-      {/* イラスト部分 */}
-      <View style={styles.illustrationContainer}>
-        <View style={styles.illustrationBg}>
-          <View style={styles.mockPhone}>
-            <View style={styles.mockPhoneScreen}>
-              {/* SNSアイコンのモック */}
-              <View style={styles.mockProfileRow}>
-                <View style={styles.mockAvatar}>
-                  <Feather name="user" size={24} color="#c0c0c0" />
-                </View>
-                <View style={styles.mockLines}>
-                  <View style={styles.mockLine} />
-                  <View style={[styles.mockLine, styles.mockLineShort]} />
-                </View>
-              </View>
-              <View style={styles.mockPost} />
-            </View>
-          </View>
-          {/* 装飾アイコン */}
-          <View style={[styles.floatingIcon, styles.floatingIconInstagram]}>
-            <Feather name="instagram" size={20} color="#E1306C" />
-          </View>
-          <View style={[styles.floatingIcon, styles.floatingIconX]}>
-            <Feather name="twitter" size={20} color="#000" />
-          </View>
-          <View style={[styles.floatingIcon, styles.floatingIconLine]}>
-            <Feather name="message-circle" size={20} color="#06C755" />
-          </View>
-        </View>
-      </View>
-
-      {/* テキスト */}
-      <Text style={styles.emptyStateTitle}>SNSアイコンをチェック</Text>
-      <Text style={styles.emptyStateDescription}>
-        プロフィール画像がSNSでどう見えるか{'\n'}
-        投稿前に確認できます
-      </Text>
-
-      {/* ボタン */}
-      <View style={styles.emptyStateButtons}>
-        <TouchableOpacity style={styles.primaryButton} onPress={addLibraryImage}>
-          <Feather name="image" size={20} color="#fff" />
-          <Text style={styles.primaryButtonText}>画像を選択</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-
   return (
     <View style={styles.container}>
-      {/* 画像がない場合は空状態UI */}
-      {images.length === 0 && (
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? -220 : 0}
+      {/* タブ + プレビュー（画像未選択でもプレースホルダーのアイコンで表示する） */}
+      <View style={styles.previewContainer}>
+        {/* 縦スクロールで設定が自然に消える、タブは固定 */}
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          stickyHeaderIndices={[1]}
+          scrollEnabled={!isDraggingImage}
         >
-          <ScrollView
-            style={styles.noImageContainer}
-            contentContainerStyle={styles.noImageContent}
-            keyboardShouldPersistTaps="handled"
-            automaticallyAdjustKeyboardInsets={true}
-          >
-            <View style={styles.header}>
-              <Text style={styles.headerTitle}>Icon Checker</Text>
-            </View>
-            {renderEmptyState()}
+          {/* 設定（スクロールで消える） */}
+          {renderSettings()}
 
-            {/* ユーザー情報入力（折りたたみ風） */}
-            <View style={styles.userInfoSection}>
-              <Text style={styles.userInfoSectionTitle}>プロフィール設定</Text>
-              {renderNameInputs()}
-            </View>
-          </ScrollView>
-        </KeyboardAvoidingView>
-      )}
-
-      {/* 画像がある場合はタブ + プレビュー */}
-      {images.length > 0 && (
-        <View style={styles.previewContainer}>
-          {/* 縦スクロールで設定が自然に消える、タブは固定 */}
-          <ScrollView
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
-            stickyHeaderIndices={[1]}
-            scrollEnabled={!isDraggingImage}
-          >
-            {/* 設定（スクロールで消える） */}
-            {renderSettings()}
-
-            {/* SNSタブ（スクロール時に上部に固定） */}
-            <View style={styles.tabContainer}>
-              <Tab
-                tabs={TABS}
-                activeTab={activeTab}
-                onTabChange={handleTabChange}
-                scrollX={scrollX}
-              />
-            </View>
-
-            {/* プレビュー - 横スワイプでタブ切り替え */}
-            <RNAnimated.FlatList
-              ref={tabFlatListRef}
-              data={TABS}
-              horizontal
-              pagingEnabled
-              showsHorizontalScrollIndicator={false}
-              keyExtractor={(item) => item}
-              style={previewHeight ? { height: previewHeight } : undefined}
-              scrollEventThrottle={16}
-              onScroll={RNAnimated.event(
-                [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-                { useNativeDriver: true }
-              )}
-              onScrollBeginDrag={() => setIsSwiping(true)}
-              onMomentumScrollEnd={(event) => {
-                const index = Math.round(
-                  event.nativeEvent.contentOffset.x / SCREEN_WIDTH
-                );
-                setActiveTab(index);
-                setIsSwiping(false);
-              }}
-              renderItem={({ index: tabIndex }) => (
-                <View style={styles.previewPage}>
-                  {/* ページ自体は行の高さ(一番高いページ)に引き伸ばされるので、中身側で測る */}
-                  <View
-                    style={styles.previewWrapper}
-                    onLayout={(e) => handlePageLayout(tabIndex, e.nativeEvent.layout.height)}
-                  >
-                    {renderPreviewItemByTab(images[selectedImageIndex], tabIndex)}
-                  </View>
-                </View>
-              )}
-              getItemLayout={(_, index) => ({
-                length: SCREEN_WIDTH,
-                offset: SCREEN_WIDTH * index,
-                index,
-              })}
+          {/* SNSタブ（スクロール時に上部に固定） */}
+          <View style={styles.tabContainer}>
+            <Tab
+              tabs={TABS}
+              activeTab={activeTab}
+              onTabChange={handleTabChange}
+              scrollX={scrollX}
             />
-          </ScrollView>
-        </View>
-      )}
+          </View>
+
+          {/* プレビュー - 横スワイプでタブ切り替え */}
+          <RNAnimated.FlatList
+            ref={tabFlatListRef}
+            data={TABS}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(item) => item}
+            style={previewHeight ? { height: previewHeight } : undefined}
+            scrollEventThrottle={16}
+            onScroll={RNAnimated.event(
+              [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+              { useNativeDriver: true }
+            )}
+            onScrollBeginDrag={() => setIsSwiping(true)}
+            onMomentumScrollEnd={(event) => {
+              const index = Math.round(
+                event.nativeEvent.contentOffset.x / SCREEN_WIDTH
+              );
+              setActiveTab(index);
+              setIsSwiping(false);
+            }}
+            renderItem={({ index: tabIndex }) => (
+              <View style={styles.previewPage}>
+                {/* ページ自体は行の高さ(一番高いページ)に引き伸ばされるので、中身側で測る */}
+                <View
+                  style={styles.previewWrapper}
+                  onLayout={(e) => handlePageLayout(tabIndex, e.nativeEvent.layout.height)}
+                >
+                  {renderPreviewItemByTab(images[selectedImageIndex] ?? null, tabIndex)}
+                </View>
+              </View>
+            )}
+            getItemLayout={(_, index) => ({
+              length: SCREEN_WIDTH,
+              offset: SCREEN_WIDTH * index,
+              index,
+            })}
+          />
+        </ScrollView>
+      </View>
 
       {/* 表示名・ユーザーIDの編集シート */}
       <Modal
@@ -419,201 +405,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-  },
-
-  // 画像がある時のメインコンテナ
-  mainContainer: {
-    flex: 1,
-    paddingTop: 50,
-  },
-
-  // 画像がない時のコンテナ
-  noImageContainer: {
-    flex: 1,
-    paddingTop: 50,
-  },
-  noImageContent: {
-    flexGrow: 1,
-    paddingBottom: 40,
-  },
-
-  // 空状態UI
-  emptyStateContainer: {
-    alignItems: 'center',
-    paddingHorizontal: 32,
-    paddingTop: 20,
-    paddingBottom: 32,
-  },
-  illustrationContainer: {
-    marginBottom: 24,
-  },
-  illustrationBg: {
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    backgroundColor: '#f0f7ff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
-  },
-  mockPhone: {
-    width: 100,
-    height: 140,
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 5,
-  },
-  mockPhoneScreen: {
-    flex: 1,
-    backgroundColor: '#fafafa',
-    borderRadius: 8,
-    padding: 8,
-  },
-  mockProfileRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  mockAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#e8e8e8',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 8,
-  },
-  mockLines: {
-    flex: 1,
-  },
-  mockLine: {
-    height: 6,
-    backgroundColor: '#e0e0e0',
-    borderRadius: 3,
-    marginBottom: 4,
-  },
-  mockLineShort: {
-    width: '60%',
-  },
-  mockPost: {
-    flex: 1,
-    backgroundColor: '#e8e8e8',
-    borderRadius: 6,
-  },
-  floatingIcon: {
-    position: 'absolute',
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  floatingIconInstagram: {
-    top: 20,
-    right: 10,
-  },
-  floatingIconX: {
-    bottom: 30,
-    right: 0,
-  },
-  floatingIconLine: {
-    bottom: 20,
-    left: 10,
-  },
-  emptyStateTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#1a1a1a',
-    marginBottom: 8,
-    fontFamily: 'Inter_700Bold',
-    textAlign: 'center',
-  },
-  emptyStateDescription: {
-    fontSize: 15,
-    color: '#666',
-    textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 28,
-    fontFamily: 'Inter_400Regular',
-  },
-  emptyStateButtons: {
-    width: '100%',
-    gap: 12,
-  },
-  primaryButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#007AFF',
-    paddingVertical: 16,
-    borderRadius: 14,
-    gap: 8,
-    shadowColor: '#007AFF',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  primaryButtonText: {
-    color: '#fff',
-    fontSize: 17,
-    fontWeight: '600',
-    fontFamily: 'Inter_600SemiBold',
-  },
-  secondaryButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#fff',
-    paddingVertical: 16,
-    borderRadius: 14,
-    gap: 8,
-    borderWidth: 1,
-    borderColor: '#e5e5e5',
-  },
-  secondaryButtonText: {
-    color: '#007AFF',
-    fontSize: 17,
-    fontWeight: '600',
-    fontFamily: 'Inter_600SemiBold',
-  },
-  userInfoSection: {
-    marginTop: 8,
-    marginHorizontal: 16,
-    padding: 16,
-    backgroundColor: '#fafafa',
-    borderRadius: 16,
-  },
-  userInfoSectionTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#666',
-    marginBottom: 16,
-    fontFamily: 'Inter_600SemiBold',
-  },
-
-  header: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: '#fff',
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#1a1a1a',
-    fontFamily: 'Inter_700Bold',
-    letterSpacing: -0.5,
   },
 
   // タブコンテナ（スクロール時に上部固定）
@@ -699,47 +490,6 @@ const styles = StyleSheet.create({
     color: '#007AFF',
     fontFamily: 'Inter_600SemiBold',
   },
-  buttonRow: {
-    flexDirection: 'row',
-    gap: 16,
-    marginBottom: 24,
-  },
-  buttonWrapper: {
-    width: '48%',
-  },
-  actionButton: {
-    flexDirection: 'column', // Stack icon and text
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#fff', // White buttons
-    paddingVertical: 16,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#f0f0f0',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 3,
-  },
-  iconCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#f0f7ff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  buttonIcon: {
-    marginRight: 8,
-  },
-  actionButtonText: {
-    color: '#333',
-    fontSize: 14,
-    fontWeight: '700',
-    fontFamily: 'Inter_600SemiBold',
-  },
 
   inputContainer: {
     gap: 12,
@@ -790,10 +540,6 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-  },
-  previewScrollContent: {
-    flexGrow: 1,
-    paddingBottom: 20,
   },
   previewWrapper: {
     padding: 20,

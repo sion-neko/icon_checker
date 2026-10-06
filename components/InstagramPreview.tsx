@@ -2,9 +2,10 @@ import React from 'react';
 import { View, Image, Text, StyleSheet } from 'react-native';
 import { Ionicons, Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import Avatar from './Avatar';
 
 interface Props {
-    imageUri: string;
+    imageUri: string | null;
     displayName: string;
     username: string;
 }
@@ -25,7 +26,7 @@ export default function InstagramPreview({ imageUri, displayName, username }: Pr
                             style={styles.storyRing}
                         >
                             <View style={styles.storyInnerRing}>
-                                <Image source={{ uri: imageUri }} style={styles.storyAvatar} />
+                                <Avatar uri={imageUri} style={styles.storyAvatar} />
                             </View>
                         </LinearGradient>
                         <Text style={styles.storyName}>{displayName}</Text>
@@ -70,7 +71,7 @@ export default function InstagramPreview({ imageUri, displayName, username }: Pr
             <View style={styles.post}>
                 {/* ヘッダー */}
                 <View style={styles.header}>
-                    <Image source={{ uri: imageUri }} style={styles.avatar} />
+                    <Avatar uri={imageUri} style={styles.avatar} />
                     <View style={styles.headerText}>
                         <Text style={styles.username}>{username}</Text>
                         <Text style={styles.location}>Tokyo, Japan</Text>
@@ -115,7 +116,7 @@ export default function InstagramPreview({ imageUri, displayName, username }: Pr
             {/* 2番目の投稿 */}
             <View style={styles.post}>
                 <View style={styles.header}>
-                    <Image source={{ uri: imageUri }} style={styles.avatar} />
+                    <Avatar uri={imageUri} style={styles.avatar} />
                     <View style={styles.headerText}>
                         <Text style={styles.username}>{username}</Text>
                         <Text style={styles.location}>Osaka, Japan</Text>
@@ -155,7 +156,7 @@ export default function InstagramPreview({ imageUri, displayName, username }: Pr
             {/* 3番目の投稿 */}
             <View style={styles.post}>
                 <View style={styles.header}>
-                    <Image source={{ uri: imageUri }} style={styles.avatar} />
+                    <Avatar uri={imageUri} style={styles.avatar} />
                     <View style={styles.headerText}>
                         <Text style={styles.username}>{username}</Text>
                         <Text style={styles.location}>Shibuya, Tokyo</Text>

@@ -1,5 +1,5 @@
 import React, { useRef, useState, useLayoutEffect } from 'react';
-import { View, ScrollView, Image, TouchableOpacity, StyleSheet, Animated, PanResponder, LayoutRectangle } from 'react-native';
+import { View, ScrollView, Image, Text, TouchableOpacity, StyleSheet, Animated, PanResponder, LayoutRectangle } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
 interface Props {
@@ -202,6 +202,11 @@ export default function ReorderableImageList({
                 >
                     <Feather name="plus" size={24} color="#007AFF" />
                 </TouchableOpacity>
+                {images.length === 0 && (
+                    <Text style={styles.emptyHint}>
+                        画像を追加すると{'\n'}各SNSでの見え方を確認できます
+                    </Text>
+                )}
             </ScrollView>
         </View>
     );
@@ -243,6 +248,13 @@ const styles = StyleSheet.create({
         height: 80,
         borderRadius: 15,
         backgroundColor: '#f0f0f0',
+    },
+    emptyHint: {
+        alignSelf: 'center',
+        marginLeft: 14,
+        fontSize: 13,
+        lineHeight: 20,
+        color: '#666',
     },
     addImageButton: {
         width: 80,

@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { View, Image, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { BlurView } from 'expo-blur';
 import IconViewer from './IconViewer';
+import Avatar from './Avatar';
 
 interface Props {
-    imageUri: string;
+    imageUri: string | null;
     displayName: string;
     username: string;
 }
@@ -14,33 +15,36 @@ export default function LinePreview({ imageUri, displayName, username }: Props) 
 
     return (
         <View style={styles.container}>
-            <IconViewer
-                visible={isViewerVisible}
-                imageUri={imageUri}
-                shape="square"
-                onClose={() => setIsViewerVisible(false)}
-            />
+            {imageUri && (
+                <IconViewer
+                    visible={isViewerVisible}
+                    imageUri={imageUri}
+                    shape="square"
+                    onClose={() => setIsViewerVisible(false)}
+                />
+            )}
 
             {/* プロフィール画面 */}
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>プロフィール</Text>
                 <View style={styles.profileCard}>
                     <View style={styles.profileBanner}>
-                        <Image
-                            key={imageUri}
-                            source={{ uri: imageUri }}
-                            style={styles.bannerImage}
-                        />
-                        <BlurView intensity={30} tint="light" style={styles.bannerBlur} />
+                        {imageUri && (
+                            <>
+                                <Image key={imageUri} source={{ uri: imageUri }} style={styles.bannerImage} />
+                                <BlurView intensity={30} tint="light" style={styles.bannerBlur} />
+                            </>
+                        )}
                         <View style={styles.bannerOverlay} />
                     </View>
                     <View style={styles.profileHeader}>
                         <TouchableOpacity
                             style={styles.lineAvatarContainer}
                             onPress={() => setIsViewerVisible(true)}
+                            disabled={!imageUri}
                             activeOpacity={0.8}
                         >
-                            <Image source={{ uri: imageUri }} style={styles.profileAvatar} />
+                            <Avatar uri={imageUri} style={styles.profileAvatar} />
                         </TouchableOpacity>
                         <Text style={styles.profileName}>{displayName}</Text>
                         <Text style={styles.statusMessage}>ステータスメッセージを設定しましょう</Text>
@@ -54,7 +58,7 @@ export default function LinePreview({ imageUri, displayName, username }: Props) 
                 <View style={styles.chatList}>
                     {/* 友達1 */}
                     <View style={styles.chatItem}>
-                        <Image source={{ uri: imageUri }} style={styles.avatar} />
+                        <Avatar uri={imageUri} style={styles.avatar} />
                         <View style={styles.chatContent}>
                             <View style={styles.chatHeader}>
                                 <Text style={styles.chatName}>{displayName}</Text>
@@ -117,7 +121,7 @@ export default function LinePreview({ imageUri, displayName, username }: Props) 
 
                     {/* 相手のメッセージ */}
                     <View style={styles.messageGroup}>
-                        <Image source={{ uri: imageUri }} style={styles.messageAvatar} />
+                        <Avatar uri={imageUri} style={styles.messageAvatar} />
                         <View style={styles.messagesColumn}>
                             <Text style={styles.messageSenderName}>{displayName}</Text>
                             <View style={styles.messageRow}>
@@ -146,7 +150,7 @@ export default function LinePreview({ imageUri, displayName, username }: Props) 
 
                     {/* 相手のメッセージ 2 */}
                     <View style={styles.messageGroup}>
-                        <Image source={{ uri: imageUri }} style={styles.messageAvatar} />
+                        <Avatar uri={imageUri} style={styles.messageAvatar} />
                         <View style={styles.messagesColumn}>
                             <View style={styles.messageRow}>
                                 <View style={styles.messageBubbleOther}>
@@ -174,7 +178,7 @@ export default function LinePreview({ imageUri, displayName, username }: Props) 
 
                     {/* 相手のメッセージ 3 */}
                     <View style={styles.messageGroup}>
-                        <Image source={{ uri: imageUri }} style={styles.messageAvatar} />
+                        <Avatar uri={imageUri} style={styles.messageAvatar} />
                         <View style={styles.messagesColumn}>
                             <View style={styles.messageRow}>
                                 <View style={styles.messageBubbleOther}>
