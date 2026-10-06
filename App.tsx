@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View, ScrollView, TextInput, Text, Image, TouchableOpacity, FlatList, Dimensions, KeyboardAvoidingView, Platform } from 'react-native';
+import { StyleSheet, View, ScrollView, TextInput, Text, TouchableOpacity, FlatList, Dimensions, KeyboardAvoidingView, Platform } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Feather } from '@expo/vector-icons';
 import { useState, useRef, useEffect } from 'react';
@@ -9,6 +9,7 @@ import InstagramPreview from './components/InstagramPreview';
 import XPreview from './components/XPreview';
 import LinePreview from './components/LinePreview';
 import Tab from './components/Tab';
+import ReorderableImageList from './components/ReorderableImageList';
 
 import { useFonts, Inter_400Regular, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
 import { ActivityIndicator } from 'react-native';
@@ -30,6 +31,7 @@ export default function App() {
   // 各タブのプレビューの実際の高さ（横並びの行が一番高いページに揃うのを防ぐため）
   const [pageHeights, setPageHeights] = useState<number[]>([]);
   const [isSwiping, setIsSwiping] = useState(false);
+  const [isDraggingImage, setIsDraggingImage] = useState(false);
 
   const [displayName, setDisplayName] = useState('あなたの名前');
   const [username, setUsername] = useState('your_username');
@@ -88,6 +90,21 @@ export default function App() {
 
   const selectImage = (index: number) => {
     setSelectedImageIndex(index);
+  };
+
+  // 並べ替えても選択中の画像が変わらないよう、選択位置も追従させる
+  const reorderImages = (from: number, to: number) => {
+    const newImages = [...images];
+    const [moved] = newImages.splice(from, 1);
+    newImages.splice(to, 0, moved);
+    setImages(newImages);
+
+    setSelectedImageIndex((selected) => {
+      if (selected === from) return to;
+      if (from < selected && selected <= to) return selected - 1;
+      if (to <= selected && selected < from) return selected + 1;
+      return selected;
+    });
   };
 
   const handleTabChange = (index: number) => {
@@ -165,40 +182,15 @@ export default function App() {
 
       {/* 画像リスト */}
       <View style={styles.imageListContainer}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.imageList}
-          contentContainerStyle={styles.imageListContent}
-        >
-          {images.map((img, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[
-                styles.imageItem,
-                selectedImageIndex === index && styles.imageItemSelectedActive
-              ]}
-              onPress={() => selectImage(index)}
-              activeOpacity={0.8}
-            >
-              <Image source={{ uri: img }} style={styles.thumbnail} />
-              <TouchableOpacity
-                style={styles.deleteButtonSmall}
-                onPress={() => removeImage(index)}
-              >
-                <Feather name="x" size={12} color="#fff" />
-              </TouchableOpacity>
-            </TouchableOpacity>
-          ))}
-          {/* 追加ボタン */}
-          <TouchableOpacity
-            style={styles.addImageButton}
-            onPress={addLibraryImage}
-            activeOpacity={0.7}
-          >
-            <Feather name="plus" size={24} color="#007AFF" />
-          </TouchableOpacity>
-        </ScrollView>
+        <ReorderableImageList
+          images={images}
+          selectedIndex={selectedImageIndex}
+          onSelect={selectImage}
+          onRemove={removeImage}
+          onAdd={addLibraryImage}
+          onReorder={reorderImages}
+          onDraggingChange={setIsDraggingImage}
+        />
       </View>
 
       {/* ユーザー情報入力 */}
@@ -353,6 +345,7 @@ export default function App() {
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
             stickyHeaderIndices={[1]}
+            scrollEnabled={!isDraggingImage}
           >
             {/* 設定（スクロールで消える） */}
             {renderSettings()}
@@ -680,56 +673,6 @@ const styles = StyleSheet.create({
 
   imageListContainer: {
     marginBottom: 24,
-  },
-  imageList: {
-    marginTop: 12,
-  },
-  imageListContent: {
-    paddingRight: 20,
-    paddingTop: 10,
-  },
-  imageItem: {
-    marginRight: 16,
-    position: 'relative',
-    borderRadius: 18,
-    backgroundColor: '#fff',
-    padding: 3,
-    borderWidth: 2,
-    borderColor: '#e0e0e0',
-  },
-  imageItemSelectedActive: {
-    borderWidth: 3,
-    borderColor: '#007AFF',
-  },
-  thumbnail: {
-    width: 80,
-    height: 80,
-    borderRadius: 15,
-    backgroundColor: '#f0f0f0',
-  },
-  addImageButton: {
-    width: 80,
-    height: 80,
-    borderRadius: 15,
-    borderWidth: 2,
-    borderColor: '#d0d0d0',
-    borderStyle: 'dashed',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fafafa',
-  },
-  deleteButtonSmall: {
-    position: 'absolute',
-    top: -6,
-    right: -6,
-    backgroundColor: 'rgba(255, 59, 48, 0.9)',
-    borderRadius: 12,
-    width: 24,
-    height: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#fff',
   },
 
   inputContainer: {
