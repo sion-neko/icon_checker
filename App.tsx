@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View, ScrollView, TextInput, Text, TouchableOpacity, FlatList, Dimensions, KeyboardAvoidingView, Platform } from 'react-native';
+import { StyleSheet, View, ScrollView, TextInput, Text, TouchableOpacity, FlatList, Dimensions, KeyboardAvoidingView, Platform, Modal } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Feather } from '@expo/vector-icons';
 import { useState, useRef, useEffect } from 'react';
@@ -36,6 +36,7 @@ export default function App() {
   const [displayName, setDisplayName] = useState('あなたの名前');
   const [username, setUsername] = useState('your_username');
   const [isDataLoaded, setIsDataLoaded] = useState(false);
+  const [isNameEditorOpen, setIsNameEditorOpen] = useState(false);
 
   const tabFlatListRef = useRef<FlatList>(null);
   const scrollX = useRef(new RNAnimated.Value(0)).current;
@@ -175,52 +176,66 @@ export default function App() {
     ? Math.max(0, ...pageHeights.filter(Boolean))
     : pageHeights[activeTab];
 
+  // 表示名・ユーザーIDの入力欄（空状態と名前編集シートで共用）
+  const renderNameInputs = () => (
+    <View style={styles.inputContainer}>
+      <View style={styles.inputGroup}>
+        <Text style={styles.label}>表示名</Text>
+        <TextInput
+          style={styles.input}
+          value={displayName}
+          onChangeText={setDisplayName}
+          placeholder="あなたの名前を表示"
+          placeholderTextColor="#999"
+        />
+      </View>
+      <View style={styles.inputGroup}>
+        <Text style={styles.label}>ユーザーID</Text>
+        <View style={styles.usernameInput}>
+          <Text style={styles.atSymbol}>@</Text>
+          <TextInput
+            style={[styles.input, styles.usernameField]}
+            value={username}
+            onChangeText={setUsername}
+            placeholder="username"
+            placeholderTextColor="#999"
+            autoCapitalize="none"
+          />
+        </View>
+      </View>
+    </View>
+  );
+
   // 設定コンポーネント（再利用）
   const renderSettings = () => (
     <View style={styles.settingsContainer}>
-      <Text style={styles.settingsTitle}>アイコンを確認する</Text>
+      <View style={styles.settingsHeader}>
+        <Text style={styles.settingsTitle}>アイコンを確認する</Text>
+        <TouchableOpacity
+          style={styles.nameChip}
+          onPress={() => setIsNameEditorOpen(true)}
+          accessibilityLabel="表示名とユーザーIDを編集"
+        >
+          <View style={styles.nameChipText}>
+            <Text style={styles.nameChipName} numberOfLines={1}>{displayName}</Text>
+            <Text style={styles.nameChipId} numberOfLines={1}>@{username}</Text>
+          </View>
+          <View style={styles.nameChipIcon}>
+            <Feather name="edit-2" size={13} color="#3f3f46" />
+          </View>
+        </TouchableOpacity>
+      </View>
 
       {/* 画像リスト */}
-      <View style={styles.imageListContainer}>
-        <ReorderableImageList
-          images={images}
-          selectedIndex={selectedImageIndex}
-          onSelect={selectImage}
-          onRemove={removeImage}
-          onAdd={addLibraryImage}
-          onReorder={reorderImages}
-          onDraggingChange={setIsDraggingImage}
-        />
-      </View>
-
-      {/* ユーザー情報入力 */}
-      <View style={styles.inputContainer}>
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>表示名</Text>
-          <TextInput
-            style={styles.input}
-            value={displayName}
-            onChangeText={setDisplayName}
-            placeholder="あなたの名前を表示"
-            placeholderTextColor="#999"
-          />
-        </View>
-
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>ユーザーID</Text>
-          <View style={styles.usernameInput}>
-            <Text style={styles.atSymbol}>@</Text>
-            <TextInput
-              style={[styles.input, styles.usernameField]}
-              value={username}
-              onChangeText={setUsername}
-              placeholder="username"
-              placeholderTextColor="#999"
-              autoCapitalize="none"
-            />
-          </View>
-        </View>
-      </View>
+      <ReorderableImageList
+        images={images}
+        selectedIndex={selectedImageIndex}
+        onSelect={selectImage}
+        onRemove={removeImage}
+        onAdd={addLibraryImage}
+        onReorder={reorderImages}
+        onDraggingChange={setIsDraggingImage}
+      />
     </View>
   );
 
@@ -306,32 +321,7 @@ export default function App() {
             {/* ユーザー情報入力（折りたたみ風） */}
             <View style={styles.userInfoSection}>
               <Text style={styles.userInfoSectionTitle}>プロフィール設定</Text>
-              <View style={styles.inputContainer}>
-                <View style={styles.inputGroup}>
-                  <Text style={styles.label}>表示名</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={displayName}
-                    onChangeText={setDisplayName}
-                    placeholder="あなたの名前を表示"
-                    placeholderTextColor="#999"
-                  />
-                </View>
-                <View style={styles.inputGroup}>
-                  <Text style={styles.label}>ユーザーID</Text>
-                  <View style={styles.usernameInput}>
-                    <Text style={styles.atSymbol}>@</Text>
-                    <TextInput
-                      style={[styles.input, styles.usernameField]}
-                      value={username}
-                      onChangeText={setUsername}
-                      placeholder="username"
-                      placeholderTextColor="#999"
-                      autoCapitalize="none"
-                    />
-                  </View>
-                </View>
-              </View>
+              {renderNameInputs()}
             </View>
           </ScrollView>
         </KeyboardAvoidingView>
@@ -403,6 +393,23 @@ export default function App() {
         </View>
       )}
 
+      {/* 表示名・ユーザーIDの編集シート */}
+      <Modal
+        visible={isNameEditorOpen}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setIsNameEditorOpen(false)}
+      >
+        <View style={styles.nameEditor}>
+          <View style={styles.nameEditorHeader}>
+            <Text style={styles.nameEditorTitle}>名前とID</Text>
+            <TouchableOpacity onPress={() => setIsNameEditorOpen(false)} hitSlop={12}>
+              <Text style={styles.nameEditorDone}>完了</Text>
+            </TouchableOpacity>
+          </View>
+          {renderNameInputs()}
+        </View>
+      </Modal>
       <StatusBar style="auto" />
     </View>
   );
@@ -623,12 +630,74 @@ const styles = StyleSheet.create({
     borderBottomColor: '#e5e5e5',
   },
 
+  settingsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    marginBottom: 20,
+  },
   settingsTitle: {
     fontSize: 22,
     fontWeight: '800',
     color: '#000',
-    marginBottom: 20,
     fontFamily: 'Inter_700Bold',
+  },
+  nameChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flexShrink: 1,
+    minHeight: 44,
+    paddingVertical: 4,
+    paddingLeft: 14,
+    paddingRight: 6,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: '#e4e4e7',
+    backgroundColor: '#fff',
+  },
+  nameChipText: {
+    flexShrink: 1,
+  },
+  nameChipName: {
+    fontSize: 13,
+    color: '#111',
+    fontFamily: 'Inter_700Bold',
+  },
+  nameChipId: {
+    fontSize: 11,
+    color: '#52525b',
+    fontFamily: 'Inter_400Regular',
+  },
+  nameChipIcon: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: '#f4f4f5',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  nameEditor: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+  nameEditorHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 24,
+  },
+  nameEditorTitle: {
+    fontSize: 17,
+    color: '#111',
+    fontFamily: 'Inter_700Bold',
+  },
+  nameEditorDone: {
+    fontSize: 16,
+    color: '#007AFF',
+    fontFamily: 'Inter_600SemiBold',
   },
   buttonRow: {
     flexDirection: 'row',
@@ -670,10 +739,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
     fontFamily: 'Inter_600SemiBold',
-  },
-
-  imageListContainer: {
-    marginBottom: 24,
   },
 
   inputContainer: {
