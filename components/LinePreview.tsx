@@ -1,6 +1,7 @@
-import React from 'react';
-import { View, Image, Text, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Image, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { BlurView } from 'expo-blur';
+import IconViewer from './IconViewer';
 
 interface Props {
     imageUri: string;
@@ -9,8 +10,17 @@ interface Props {
 }
 
 export default function LinePreview({ imageUri, displayName, username }: Props) {
+    const [isViewerVisible, setIsViewerVisible] = useState(false);
+
     return (
         <View style={styles.container}>
+            <IconViewer
+                visible={isViewerVisible}
+                imageUri={imageUri}
+                shape="square"
+                onClose={() => setIsViewerVisible(false)}
+            />
+
             {/* プロフィール画面 */}
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>プロフィール</Text>
@@ -25,9 +35,13 @@ export default function LinePreview({ imageUri, displayName, username }: Props) 
                         <View style={styles.bannerOverlay} />
                     </View>
                     <View style={styles.profileHeader}>
-                        <View style={styles.lineAvatarContainer}>
+                        <TouchableOpacity
+                            style={styles.lineAvatarContainer}
+                            onPress={() => setIsViewerVisible(true)}
+                            activeOpacity={0.8}
+                        >
                             <Image source={{ uri: imageUri }} style={styles.profileAvatar} />
-                        </View>
+                        </TouchableOpacity>
                         <Text style={styles.profileName}>{displayName}</Text>
                         <Text style={styles.statusMessage}>ステータスメッセージを設定しましょう</Text>
                     </View>
