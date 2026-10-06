@@ -6,11 +6,6 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#E8E8E8"
-    },
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -45,7 +40,17 @@
           "photosPermission": "アイコンプレビュー用の画像を選択します"
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-status-bar",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/icon.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#E8E8E8",
+          "imageWidth": 200
+        }
+      ]
     ],
     "extra": {
       "eas": {
