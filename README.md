@@ -98,31 +98,6 @@ npm run web
    - プレビューにリアルタイムで反映
    - 入力内容は自動保存され、次回起動時に復元
 
-## プロジェクト構成
-
-```
-icon-checker/
-├── App.tsx              # メインアプリケーション
-├── components/          # コンポーネント
-│   ├── InstagramPreview.tsx
-│   ├── XPreview.tsx
-│   ├── LinePreview.tsx
-│   └── Tab.tsx
-├── assets/              # アイコンや画像
-├── app.json            # Expo設定
-├── package.json        # 依存関係
-└── tsconfig.json       # TypeScript設定
-```
-
-## 技術スタック
-
-- **フレームワーク**: Expo SDK 54
-- **UI**: React Native
-- **言語**: TypeScript
-- **画像選択**: expo-image-picker
-- **データ保存**: @react-native-async-storage/async-storage
-- **フォント**: @expo-google-fonts/inter
-
 ## トラブルシューティング
 
 ### ポートが使用中のエラー
