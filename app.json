@@ -19,8 +19,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/icon.png",
-        "backgroundColor": "#007AFF"
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FA947C"
       },
       "package": "com.github.sion.neko.iconchecker",
       "versionCode": 1,
