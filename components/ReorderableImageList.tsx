@@ -148,7 +148,7 @@ export default function ReorderableImageList({
                     const isDragging = draggingIndex === index;
                     return (
                         <Animated.View
-                            key={index}
+                            key={img}
                             onLayout={(e) => {
                                 layouts.current[index] = e.nativeEvent.layout;
                             }}

@@ -136,9 +136,11 @@ export default function App() {
     const newImages = images.filter((_, i) => i !== index);
     setImages(newImages);
 
-    if (selectedImageIndex >= newImages.length) {
-      setSelectedImageIndex(Math.max(0, newImages.length - 1));
-    }
+    // 選択中の画像より前を消した時も、同じ画像を選んだままにする
+    setSelectedImageIndex((selected) => {
+      if (index < selected) return selected - 1;
+      return Math.min(selected, Math.max(0, newImages.length - 1));
+    });
   };
 
   const selectImage = (index: number) => {
