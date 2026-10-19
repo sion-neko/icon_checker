@@ -2,9 +2,11 @@
 
 SNSアイコンのプレビューを確認できるReact Nativeアプリケーションです。Instagram、X（旧Twitter）、LINEなど複数のSNSでアイコンがどのように表示されるかを確認できます。
 
-| 初期画面 | Instagram | X | LINE |
-| :---: | :---: | :---: | :---: |
-| <img src="docs/screenshots/01-empty.png" width="200"> | <img src="docs/screenshots/02-instagram.png" width="200"> | <img src="docs/screenshots/03-x.png" width="200"> | <img src="docs/screenshots/04-line.png" width="200"> |
+<p>
+<img src="docs/store-screenshots/01.png" width="150"><img src="docs/store-screenshots/02.png" width="150"><img src="docs/store-screenshots/03.png" width="150"><img src="docs/store-screenshots/04.png" width="150"><img src="docs/store-screenshots/05.png" width="150"><img src="docs/store-screenshots/06.png" width="150">
+</p>
+
+App Store掲載用のスクリーンショット（1290×2796）は `docs/store-screenshots/` にあります。
 
 ## 機能
 
