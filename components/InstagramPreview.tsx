@@ -74,7 +74,7 @@ export default function InstagramPreview({ imageUri, displayName, username }: Pr
                     <Avatar uri={imageUri} style={styles.avatar} />
                     <View style={styles.headerText}>
                         <Text style={styles.username}>{username}</Text>
-                        <Text style={styles.location}>Tokyo, Japan</Text>
+                        <Text style={styles.location}>Kagoshima, Japan</Text>
                     </View>
                     <Feather name="more-horizontal" size={24} color="black" />
                 </View>
@@ -103,7 +103,7 @@ export default function InstagramPreview({ imageUri, displayName, username }: Pr
                     <Text>
                         <Text style={styles.username}>{username} </Text>
                         <Text style={styles.captionText}>
-                            新しいアイコンに変えてみました！どうですか？ #newicon #profile
+                            旅先で見つけた景色 🌿 #trip #nature
                         </Text>
                     </Text>
                 </View>
@@ -119,7 +119,7 @@ export default function InstagramPreview({ imageUri, displayName, username }: Pr
                     <Avatar uri={imageUri} style={styles.avatar} />
                     <View style={styles.headerText}>
                         <Text style={styles.username}>{username}</Text>
-                        <Text style={styles.location}>Osaka, Japan</Text>
+                        <Text style={styles.location}>Fukuoka, Japan</Text>
                     </View>
                     <Feather name="more-horizontal" size={24} color="black" />
                 </View>
@@ -144,7 +144,7 @@ export default function InstagramPreview({ imageUri, displayName, username }: Pr
                     <Text>
                         <Text style={styles.username}>{username} </Text>
                         <Text style={styles.captionText}>
-                            週末のお菓子タイム 🍰☕ #weekend #snack
+                            がっつりランチ 🍖 お肉もエビも全部のせ #lunch #grill
                         </Text>
                     </Text>
                 </View>
@@ -159,7 +159,7 @@ export default function InstagramPreview({ imageUri, displayName, username }: Pr
                     <Avatar uri={imageUri} style={styles.avatar} />
                     <View style={styles.headerText}>
                         <Text style={styles.username}>{username}</Text>
-                        <Text style={styles.location}>Shibuya, Tokyo</Text>
+                        <Text style={styles.location}>Kumamoto, Japan</Text>
                     </View>
                     <Feather name="more-horizontal" size={24} color="black" />
                 </View>
@@ -184,7 +184,7 @@ export default function InstagramPreview({ imageUri, displayName, username }: Pr
                     <Text>
                         <Text style={styles.username}>{username} </Text>
                         <Text style={styles.captionText}>
-                            新しい場所を発見した 📍 #explore #travel
+                            ひつじに会ってきた 🐑 もこもこ #sheep #farm
                         </Text>
                     </Text>
                 </View>
