@@ -13,7 +13,13 @@ import Tab from './components/Tab';
 import ReorderableImageList from './components/ReorderableImageList';
 
 import { useFonts, Inter_400Regular, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
-import { ActivityIndicator } from 'react-native';
+import * as SplashScreen from 'expo-splash-screen';
+
+// 一瞬で開くより少し間があるほうが「起動した」感が出るので、スプラッシュを最低これだけ見せる
+const MIN_SPLASH_MS = 500;
+
+SplashScreen.preventAutoHideAsync();
+SplashScreen.setOptions({ fade: true });
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -65,6 +71,8 @@ export default function App() {
   const [username, setUsername] = useState('your_username');
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isNameEditorOpen, setIsNameEditorOpen] = useState(false);
+  const [isMinSplashElapsed, setIsMinSplashElapsed] = useState(false);
+  const isReady = fontsLoaded && isDataLoaded && isMinSplashElapsed;
 
   const tabFlatListRef = useRef<FlatList>(null);
   const scrollX = useRef(new RNAnimated.Value(0)).current;
@@ -100,6 +108,16 @@ export default function App() {
 
     loadUserData();
   }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsMinSplashElapsed(true), MIN_SPLASH_MS);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // 読み込みが終わり、最低表示時間も過ぎてからスプラッシュを閉じる
+  useEffect(() => {
+    if (isReady) SplashScreen.hideAsync();
+  }, [isReady]);
 
   const addLibraryImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -306,13 +324,9 @@ export default function App() {
     </View>
   );
 
-  // 保存データの読み込み前に空の状態がチラつかないよう、読み込み完了まで待つ
-  if (!fontsLoaded || !isDataLoaded) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
+  // 保存データの読み込み前に空の状態がチラつかないよう、準備ができるまではスプラッシュのまま何も描かない
+  if (!isReady) {
+    return null;
   }
 
   return (
